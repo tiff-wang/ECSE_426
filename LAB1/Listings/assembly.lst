@@ -1,0 +1,187 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000                 AREA             text, CODE, READONLY
+    2 00000000                 EXPORT           asm_math
+    3 00000000         
+    4 00000000         asm_math
+    5 00000000         ; inputs:
+    6 00000000         ;   R0 : pointer to input array
+    7 00000000         ;   R1 : pointer to output array
+    8 00000000         ;   R2 : length of input array
+    9 00000000         ; output:
+   10 00000000         ;   [RMS_value, max_value, min_value, max_index, min_ind
+                       ex]
+   11 00000000         
+   12 00000000         ; R0 input array pointer
+   13 00000000         ; R1 output array pointer
+   14 00000000         ; R2 input array length
+   15 00000000         ; R3 max index
+   16 00000000         ; R4 min index
+   17 00000000         ; R5 loop counter
+   18 00000000         ; ---
+   19 00000000         ; S0 rms
+   20 00000000         ; S1 max 
+   21 00000000         ; S2 min
+   22 00000000         ; S3 for looping inputs
+   23 00000000 B430            PUSH             {R4, R5}
+   24 00000002 F04F 0500       MOV              R5, #0      ; counter = 0
+   25 00000006 F04F 0300       MOV              R3, #0      ; max, min index = 
+                                                            0
+   26 0000000A F04F 0400       MOV              R4, #0
+   27 0000000E EE30 0A40       VSUB.F32         S0, S0, S0
+   28 00000012 EDD0 0A00       VLDR.32          S1, [R0]    ; set min and max =
+                                                             first
+   29 00000016 ED90 1A00       VLDR.32          S2, [R0]
+   30 0000001A 4295    loop    CMP              R5, R2
+   31 0000001C D022            BEQ              exit
+   32 0000001E EDD0 1A00       VLDR.32          S3, [R0]    ; current item
+   33 00000022 EEA1 0AA1       VFMA.F32         S0, S3, S3  ; 
+   34 00000026         
+   35 00000026 EEF4 1A60       VCMP.F32         S3, S1      ; compare current i
+                                                            tem to current min
+   36 0000002A EEF1 FA10       VMRS             APSR_nzcv, FPSCR ; transfer FP 
+                                                            status register to 
+                                                            ARM APSR
+   37 0000002E DC09            BGT              ifc         ; 
+   38 00000030         
+   39 00000030 EEF4 1A41       VCMP.F32         S3, S2      ; compare current i
+                                                            tem to current max
+   40 00000034 EEF1 FA10       VMRS             APSR_nzcv, FPSCR ; 
+   41 00000038 DB0C            BLT              elsec       ;
+   42 0000003A         
+   43 0000003A F105 0501       ADD              R5, R5, #1  ; ++i
+   44 0000003E F100 0004       ADD              R0, R0, #4
+   45 00000042 E7EA            B                loop
+   46 00000044 462B    ifc     MOV              R3, R5      ; max 
+   47 00000046 EEF0 0A61       VMOV.F32         S1, S3
+   48 0000004A F105 0501       ADD              R5, R5, #1  ; ++i
+   49 0000004E F100 0004       ADD              R0, R0, #4
+   50 00000052 E7E2            B                loop
+   51 00000054 462C    elsec   MOV              R4, R5      ; min
+   52 00000056 EEB0 1A61       VMOV.F32         S2, S3
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+   53 0000005A F105 0501       ADD              R5, R5, #1  ; ++i
+   54 0000005E F100 0004       ADD              R0, R0, #4
+   55 00000062 E7DA            B                loop
+   56 00000064 EE01 2A90 
+                       exit    VMOV             S3, R2      ; convert length in
+                                                            t->float
+   57 00000068 EEF8 1A61       VCVT.F32.U32     S3, S3
+   58 0000006C EE80 0A21       VDIV.F32         S0, S0, S3  ; divide sum of squ
+                                                            ares 
+   59 00000070 EEB1 0AC0       VSQRT.F32        S0, S0      ; square root and a
+                                                            dd back
+   60 00000074 ED81 0A00       VSTR.32          S0, [R1]    ; mrs
+   61 00000078 EDC1 0A01       VSTR.32          S1, [R1, #4] ; max value
+   62 0000007C ED81 1A02       VSTR.32          S2, [R1, #8] ; min value
+   63 00000080         
+   64 00000080 EE00 3A10       VMOV             S0, R3      ; move max index to
+                                                             floating point reg
+                                                            ister
+   65 00000084 EEB8 0A40       VCVT.F32.U32     S0, S0      ; tell S0 to interp
+                                                            ret data as integer
+                                                            
+   66 00000088 ED81 0A03       VSTR.32          S0, [R1, #12] ; store max index
+                                                             in fourth cell of 
+                                                            output
+   67 0000008C EE00 4A10       VMOV             S0, R4      ; move min index to
+                                                             S0
+   68 00000090 EEB8 0A40       VCVT.F32.U32     S0, S0      ; tell S0 to interp
+                                                            ret data as integer
+                                                            
+   69 00000094 ED81 0A04       VSTR.32          S0, [R1, #16] ; store min index
+                                                             in fifth cell of o
+                                                            utput
+   70 00000098         
+   71 00000098 BC30            POP              {R4, R5}    ; 
+   72 0000009A 4770            BX               LR
+   73 0000009C         
+   74 0000009C         END
+                       
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
+erwork --depend=.\objects\assembly.d -o.\objects\assembly.o -I.\RTE\_Target_1 -
+IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include -IC:\Keil_v5\ARM\PACK\Keil\S
+TM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include --predefine="__EVA
+L SETA 1" --predefine="__UVISION_VERSION SETA 524" --predefine="_RTE_ SETA 1" -
+-predefine="STM32F407xx SETA 1" --list=.\listings\assembly.lst Assembly.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+END 0000009C
+
+Symbol: END
+   Definitions
+      At line 74 in file Assembly.s
+   Uses
+      None
+Comment: END unused
+asm_math 00000000
+
+Symbol: asm_math
+   Definitions
+      At line 4 in file Assembly.s
+   Uses
+      At line 2 in file Assembly.s
+Comment: asm_math used once
+elsec 00000054
+
+Symbol: elsec
+   Definitions
+      At line 51 in file Assembly.s
+   Uses
+      At line 41 in file Assembly.s
+Comment: elsec used once
+exit 00000064
+
+Symbol: exit
+   Definitions
+      At line 56 in file Assembly.s
+   Uses
+      At line 31 in file Assembly.s
+Comment: exit used once
+ifc 00000044
+
+Symbol: ifc
+   Definitions
+      At line 46 in file Assembly.s
+   Uses
+      At line 37 in file Assembly.s
+Comment: ifc used once
+loop 0000001A
+
+Symbol: loop
+   Definitions
+      At line 30 in file Assembly.s
+   Uses
+      At line 45 in file Assembly.s
+      At line 50 in file Assembly.s
+      At line 55 in file Assembly.s
+
+text 00000000
+
+Symbol: text
+   Definitions
+      At line 1 in file Assembly.s
+   Uses
+      None
+Comment: text unused
+7 symbols
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Relocatable symbols
+
+342 symbols in table
