@@ -78,8 +78,7 @@ static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_DAC_Init(void);
 void FIR_C(int input, float *output);
-void plot_point(float, float *);
-int blueButtonPressed();
+void c_math(float, float *);
 void displayLEDValue(int number, int position);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -119,15 +118,14 @@ int main(void)
   MX_DAC_Init();
 
   /* USER CODE BEGIN 2 */
-	int adc_val;
+	int adc;
 	float res_filter = 0.0;
 	
 	HAL_ADC_Start_IT(&hadc1);
 	
 	// Give a initial DAC value
-	int dac_val = 0x12;
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_8B_R, dac_val); 
+	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_8B_R, 0x12); 
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -135,13 +133,15 @@ int main(void)
 	float results[3];
   while (1)
   {
+
+    /* Blue button debouncer */
 		if(debounce > 0){
 			debounce = (debounce + 1) % 500;
 		}	
 		displayLEDValue((int)(results[displayMode] * 100) % 100, 2);
 		displayLEDValue((int)(results[displayMode] * 10) % 10, 3);
 		displayLEDValue((int)results[displayMode], 4);
-		//when in sysTick
+		//Systick Interrupt Flag
 			if (sysTickFlag == 1){
 				sysTickFlag = 0;
 
@@ -153,30 +153,21 @@ int main(void)
 				HAL_GPIO_WritePin(GPIOD, LD6_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_RESET);
-				switch(displayMode) {
-					case 0:
-						HAL_GPIO_WritePin(GPIOD, LD6_Pin, GPIO_PIN_SET);
-						break;
-					case 1:
-						HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
-						break;
-					case 2:
+
+        if(displayMode == 0){
+            HAL_GPIO_WritePin(GPIOD, LD6_Pin, GPIO_PIN_SET);
+        } else if (displayMode == 1){
+            HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
+        } else {
 						HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_SET);
-						break;
-					default:
-						break;
 				}
 				
-				//acquire value from ADC and updates the metrics accordingly
+        /** Handling ADC at each Systic interrupt (sample)
+            Get ADC value and update RMS, Min, Max metrics accordingly
+         */
 				adc  = HAL_ADC_GetValue(&hadc1);
 				FIR_C(adc, &res_filter);
 				c_math(3.3 * res_filter / 255.0, results);
-
-        /*
-				printf("RMS: %f", results[0]);
-				printf("min: %f", results[1]);
-				printf("max: %f", results[2]);
-        */
 		}
 				
 		}
@@ -485,7 +476,7 @@ void c_math(float input, float* output) {
 		else if(input > max) max = input;
 		rms_counter += input * input;
 	}
-	count = (count + 1) % 200;
+	count = (count + 1) % 500;
 	output[0] = sqrt(rms_counter / count);
 	output[1] = min;
 	output[2] = max;
