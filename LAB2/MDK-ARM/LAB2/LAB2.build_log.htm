@@ -21,23 +21,19 @@ Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V3.0.1.0
 Dialog DLL:      TCM.DLL V1.32.0.0
  
 <h2>Project:</h2>
-C:\Users\Isaac Chan\Downloads\ecse426-winter2018-master\ecse426-winter2018-master\LAB2\MDK-ARM\LAB2.uvprojx
-Project File Date:  02/14/2018
+C:\Users\Isaac Chan\Downloads\Ass2\LAB2\MDK-ARM\LAB2.uvprojx
+Project File Date:  02/15/2018
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'LAB2'
 compiling main.c...
-../Src/main.c(81): warning:  #1295-D: Deprecated declaration blueButtonPressed - give arg types
-  int blueButtonPressed();
-../Src/main.c(166): warning:  #181-D: argument is incompatible with corresponding format string conversion
-  				printf("%f\n", adc_val);
-../Src/main.c(168): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-  				float voltage_reading = 3.3 * filtered_val / 255.0;
-../Src/main.c: 3 warnings, 0 errors
+../Src/main.c(170): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  				c_math(9.9 * res_filter / 1020.0, results);
+../Src/main.c: 1 warning, 0 errors
 linking...
-Program Size: Code=10488 RO-data=440 RW-data=64 ZI-data=1136  
-"LAB2\LAB2.axf" - 0 Error(s), 3 Warning(s).
+Program Size: Code=7480 RO-data=440 RW-data=60 ZI-data=1140  
+"LAB2\LAB2.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -60,7 +56,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.2
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>

@@ -79,7 +79,7 @@ static void MX_ADC1_Init(void);
 static void MX_DAC_Init(void);
 void FIR_C(int input, float *output);
 void c_math(float, float *);
-void displayLEDValue(int number, int position);
+void display(int number, int position);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
@@ -125,7 +125,7 @@ int main(void)
 	
 	// Give a initial DAC value
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_8B_R, 0x12); 
+	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_8B_R, 30000); 
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -138,9 +138,9 @@ int main(void)
 		if(debounce > 0){
 			debounce = (debounce + 1) % 500;
 		}	
-		displayLEDValue((int)(results[displayMode] * 100) % 100, 2);
-		displayLEDValue((int)(results[displayMode] * 10) % 10, 3);
-		displayLEDValue((int)results[displayMode], 4);
+		display((int)(results[displayMode] * 100) % 100, 2);
+		display((int)(results[displayMode] * 10) % 10, 3);
+		display((int)results[displayMode], 4);
 		//Systick Interrupt Flag
 			if (sysTickFlag == 1){
 				sysTickFlag = 0;
@@ -167,7 +167,7 @@ int main(void)
          */
 				adc  = HAL_ADC_GetValue(&hadc1);
 				FIR_C(adc, &res_filter);
-				c_math(3.3 * res_filter / 255.0, results);
+				c_math(9.9 * res_filter / 1020.0, results);
 		}
 				
 		}
@@ -510,7 +510,7 @@ void FIR_C(int input, float *output) {
  * @param  int number, int position
  * @retval None
  */
-void displayLEDValue(int number, int position){
+void display(int number, int position){
 	// set a specific value to set all the segment pins to low 
 	if (number == -1){
 			HAL_GPIO_WritePin(GPIOE, SEG_A , GPIO_PIN_RESET);
