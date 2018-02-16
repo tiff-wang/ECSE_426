@@ -142,10 +142,14 @@ int main(void)
     /* Blue button debouncer */
 		if(debounce > 0){
 			debounce = (debounce + 1) % 500;
-		}	
-		display((int)(results[displayMode] * 100) % 100, 4);
-		display((int)(results[displayMode] * 10) % 10, 3);
-		display((int)results[displayMode], 2);
+		}
+      
+        int first_digit = (int)results[displayMode] * 100) % 100;
+        int second_digit = (int)results[displayMode] * 10) % 10;
+        int third_digit = (int)results[displayMode];
+		display(first_digit, 4);
+      display(second_digit, 3);
+		display(third_digit, 2);
 		//Systick Interrupt Flag
 			if (sysTickFlag == 1){
 				sysTickFlag = 0;
@@ -164,7 +168,7 @@ int main(void)
         } else if (displayMode == 1){
             HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
         } else {
-						HAL_GPIO_WritePin(GPIOD, LD5_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOD, LD5_Pin, GPIO_PIN_SET);
 				}
 				
         /** Handling ADC at each Systic interrupt (sample)
