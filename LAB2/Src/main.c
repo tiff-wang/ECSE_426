@@ -69,6 +69,11 @@ volatile int displayMode = 0;
 volatile int debounce = 0;
 float coeff[5] = {0.1,0.15,0.5,0.15,0.1};
 int coeff_len = 5;
+int count = 0;
+float min = 10.0;
+float max = 0.0;
+float rms_counter = 0.0;
+float rms[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 /* USER CODE END PV */
 
@@ -138,36 +143,45 @@ int main(void)
 		if(debounce > 0){
 			debounce = (debounce + 1) % 500;
 		}	
-		display((int)(results[displayMode] * 100) % 100, 2);
+		display((int)(results[displayMode] * 100) % 100, 4);
 		display((int)(results[displayMode] * 10) % 10, 3);
-		display((int)results[displayMode], 4);
+		display((int)results[displayMode], 2);
 		//Systick Interrupt Flag
 			if (sysTickFlag == 1){
 				sysTickFlag = 0;
 
          /** Blue button = high
              The display mode changes RMS --> Min --> Max
-             Update LD3(Max) , LD4(Min) and LD6 (RMS) accordingly.
+             Update LD5(Max) , LD4(Min) and LD3 (RMS) accordingly.
          */
 			
-				HAL_GPIO_WritePin(GPIOD, LD6_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOD, LD5_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_RESET);
 
         if(displayMode == 0){
-            HAL_GPIO_WritePin(GPIOD, LD6_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_SET);
         } else if (displayMode == 1){
             HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
         } else {
-						HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_SET);
+						HAL_GPIO_WritePin(GPIOD, LD5_Pin, GPIO_PIN_SET);
 				}
 				
         /** Handling ADC at each Systic interrupt (sample)
             Get ADC value and update RMS, Min, Max metrics accordingly
          */
+				HAL_ADC_Start_IT(&hadc1);
 				adc  = HAL_ADC_GetValue(&hadc1);
+				printf("%d\n", adc);
+				
 				FIR_C(adc, &res_filter);
-				c_math(9.9 * res_filter / 1020.0, results);
+				c_math(3.0 * res_filter / 256.0, results);
+
+				
+				printf("RMS: %f ", results[0]);
+				printf("Min: %f ", results[1]);
+				printf("Max: %f \n\n", results[2]);
+				
 		}
 				
 		}
@@ -439,13 +453,12 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(MEMS_INT2_GPIO_Port, &GPIO_InitStruct);
 	
 	//7-segment display
-	GPIO_InitStruct.Pin = SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F | SEG_G | SEG_DP | SEG_OUT1 | SEG_OUT2 | SEG_OUT3 | SEG_OUT4 ; 	// initialize the 7-segment display for the LEDs pin
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; //set pins to output push pull mode
-	GPIO_InitStruct.Pull = GPIO_NOPULL; // no pull for 7-segment pins
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM; //Speed of pin
+	GPIO_InitStruct.Pin = SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F | SEG_G | SEG_DP | SEG_OUT1 | SEG_OUT2 | SEG_OUT3 | SEG_OUT4 ; 	
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; //push pull mode
+	GPIO_InitStruct.Pull = GPIO_NOPULL; // no pull cause already push pull
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH; 
 	
-	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct); // Initiate the pins with the setting from GPIO_INIT
-	// when initialize, set all the pins to LOW
+	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct); 
 	HAL_GPIO_WritePin(GPIOE, SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F | SEG_G | SEG_DP | SEG_OUT1 | SEG_OUT2 | SEG_OUT3 | SEG_OUT4, GPIO_PIN_RESET); 
 
 
@@ -462,22 +475,28 @@ static void MX_GPIO_Init(void)
  * @retval None
  */
 
-void c_math(float input, float* output) {
-	static int count = 0;
-	static float min = 10.0;
-	static float max = 0.0;
-	static float rms_counter = 0.0;
+void c_math(float input, float* output) { 
 	if(count == 0) {
 		min = input;
 		max = input;
-		rms_counter = input * input;
 	} else {
 		if(input < min) min = input;
 		else if(input > max) max = input;
-		rms_counter += input * input;
+	}
+	
+	//update rms vector of 10
+	for(int i = 0 ; i < 9 ; i++){
+      rms[i] = rms[i + 1];
+  }
+	rms[9] = input * input;
+	rms_counter = rms_counter + 1.0;
+	float sum = 0;
+	
+	for(int k = 0 ; k < 10 ; k++){
+		sum += rms[k];
 	}
 	count = (count + 1) % 500;
-	output[0] = sqrt(rms_counter / count);
+	output[0] = sqrt(sum / ((rms_counter < 10) ? rms_counter : 10));
 	output[1] = min;
 	output[2] = max;
 }
