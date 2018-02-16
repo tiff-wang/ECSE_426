@@ -67,7 +67,7 @@ int x[] = {0, 0, 0, 0, 0};
 volatile int sysTickFlag;
 volatile int displayMode = 0;
 volatile int debounce = 0;
-float coeff[5] = {0.1,0.15,0.5,0.15,0.1};
+float coeff[5] = {0.2, 0.2, 0.2, 0.2, 0.2};
 int coeff_len = 5;
 int count = 0;
 float min = 10.0;
@@ -130,7 +130,7 @@ int main(void)
 	
 	// Give a initial DAC value
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_8B_R, 30000); 
+	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_10B_R, 800);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -148,7 +148,7 @@ int main(void)
         int second_digit = (int)results[displayMode] * 10) % 10;
         int third_digit = (int)results[displayMode];
 		display(first_digit, 4);
-      display(second_digit, 3);
+        display(second_digit, 3);
 		display(third_digit, 2);
 		//Systick Interrupt Flag
 			if (sysTickFlag == 1){
@@ -169,7 +169,7 @@ int main(void)
             HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
         } else {
             HAL_GPIO_WritePin(GPIOD, LD5_Pin, GPIO_PIN_SET);
-				}
+        }
 				
         /** Handling ADC at each Systic interrupt (sample)
             Get ADC value and update RMS, Min, Max metrics accordingly
@@ -179,7 +179,9 @@ int main(void)
 				printf("%d\n", adc);
 				
 				FIR_C(adc, &res_filter);
-				c_math(3.0 * res_filter / 256.0, results);
+                
+                //convert ADC value to desired (ratio from VDD_max)
+				c_math(3.0 * res_filter / 1024.0, results);
 
 				
 				printf("RMS: %f ", results[0]);
@@ -259,7 +261,7 @@ static void MX_ADC1_Init(void)
     */
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
-  hadc1.Init.Resolution = ADC_RESOLUTION_8B;
+  hadc1.Init.Resolution = ADC_RESOLUTION_10B;
   hadc1.Init.ScanConvMode = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
