@@ -64,7 +64,7 @@
 #define SEG_OUT2 GPIO_PIN_4		
 #define SEG_OUT3 GPIO_PIN_5		
 #define SEG_OUT4 GPIO_PIN_6	
-#define PWM_PERIOD 168
+#define PWM_PERIOD 168 // (84MHz / 750kHz) - 1 
 
 
 
@@ -84,7 +84,7 @@ TIM_HandleTypeDef htim3;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-enum State {Input, Output, Wait, Sleep};
+enum State {Wait, Output, Sleep};
 struct __FILE {
     int dummy;
 };
@@ -100,8 +100,14 @@ volatile int displayMode = 0;
 float coeff[5] = {0.2, 0.2, 0.2, 0.2, 0.2};
 int coeff_len = 5;
 int count = 0;
-int key_hold_counter = 0 ;
+
+// STAR key counter and flag 
+int key_star_counter = 0 ;
 int star_flag = 0 ;
+int star_release_debounce = 0 ;
+
+int first_digit, second_digit, third_digit;
+
 float min = 10.0;
 float max = 0.0;
 float rms_counter = 0.0;
@@ -177,6 +183,9 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	int key = 0;
+	
+	HAL_TIM_Base_Start(&htim3);
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 
   /* USER CODE END 2 */
 
@@ -188,43 +197,91 @@ int main(void)
 			debounce = (debounce + 1) % debounce_mod;
 		}
 		
+		/* Display the voltage on the LED screen */
+		display(first_digit, 2);
+		display(second_digit, 3);
+		display(third_digit, 4);
+		
   /* USER CODE END WHILE */
     MX_USB_HOST_Process();
 
   /* USER CODE BEGIN 3 */
-		
-		/* Display the voltage on the LED screen */
-		int first_digit = results * 100;
-    int second_digit = results * 10;
-    int third_digit = results;
-		display(first_digit, 4);
-        display(second_digit, 3);
-		display(third_digit, 2);
+	
 		
 		key = get_key();
 		
-		if(key > -1 && key < 10){
-			printf("key : %d \n", key);
-			voltage = update_voltage(key, 0);
-			printf("voltage : %d \n", voltage);
+		/* Always check for STAR inputs */ 
+		if(key == STAR){
+			star_flag = 1;
+			key_star_counter++;
+			star_release_debounce = 0;
 		}
-		else if(key == POUND){
-			results = voltage;
-			voltage = 0 ;
-			printf("voltage entered: %d \n", results);
+		else if(star_flag == 1){
+			//allow for key misreadings
+			if(star_release_debounce < 3) {
+				star_release_debounce++; 
+			}
+			else{
+				star_release_debounce = 0;
+				star_flag = 0;
+				//check how long the key has been pressed
+				if(key_star_counter > 25 && key_star_counter <  75){
+					//restart operation				
+					state = Wait; 
+					printf("Go to state Wait");
+				} 
+				else {
+					//goes to sleep
+					state = Sleep;
+					printf("Go to state Sleep");
+				}
+			}
 		}
-		//complete for star 
-		
 			switch(state){
-				case Input:
-					
-					break;
-				case Output:
-					break;
 				case Wait:
+						key = get_key();
+		
+					if(key > -1 && key < 10){
+						printf("key : %d \n", key);
+						voltage = update_voltage(key, 0);
+						printf("voltage : %d \n", voltage);
+					}
+					else if(key == POUND){
+						results = voltage;
+						voltage = 0 ;
+						printf("voltage entered: %d \n", results);
+					}
+					else if(key == STAR){
+						star_flag = 1;
+						key_star_counter++;
+						star_release_debounce = 0;
+					}
+					// when key == -1 (nothing is pressed)
+					else if(star_flag == 1){
+							//check how long this is
+								//delete last entered digit 
+						voltage = update_voltage(0, 1);
+					}
 					break;
+				
+				case Output:
+					/* Update the display digits */
+					first_digit = (results / 100 ) % 10 ;
+					second_digit = (results / 10) % 10 ;
+					third_digit = results % 10 ;
+				
+					/* Go to state Wait */
+					state = Wait;
+					break;
+
 				case Sleep:
+					/* Update the digits to -1 (turn off) */
+					first_digit = -1 ;
+					second_digit = -1 ;
+					third_digit = -1 ;
+					voltage = 0 ;
 					break;
+				
 				default:
 					break;
 			
@@ -406,7 +463,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 0;
+  htim1.Init.Period = 0; 
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
@@ -440,7 +497,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 0;
+  htim3.Init.Period = PWM_PERIOD;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
   {
@@ -466,7 +523,7 @@ static void MX_TIM3_Init(void)
   }
 
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
+  sConfigOC.Pulse = 0.7 * PWM_PERIOD;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
