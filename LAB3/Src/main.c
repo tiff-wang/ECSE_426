@@ -51,6 +51,7 @@
 #include "usb_host.h"
 
 /* USER CODE BEGIN Includes */
+#include "keypad.h"
 #define SEG_A GPIO_PIN_7			
 #define SEG_B GPIO_PIN_8			
 #define SEG_C GPIO_PIN_9			
@@ -90,17 +91,23 @@ struct __FILE {
 FILE __stdout;
 enum State state = Wait;
 
+volatile int debounce = 0;
+int debounce_mod = 600;
 int x[] = {0, 0, 0, 0, 0};
 volatile int sysTickFlag;
 volatile int displayMode = 0;
-volatile int debounce = 0;
+
 float coeff[5] = {0.2, 0.2, 0.2, 0.2, 0.2};
 int coeff_len = 5;
 int count = 0;
+int key_hold_counter = 0 ;
+int star_flag = 0 ;
 float min = 10.0;
 float max = 0.0;
 float rms_counter = 0.0;
 float rms[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+static int voltage = 0; 
+
 
 
 /* USER CODE END PV */
@@ -123,6 +130,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 /* Private function prototypes -----------------------------------------------*/
 void display(int number, int position);
 int get_key(void);
+int update_voltage(int digit, int action);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -137,7 +145,7 @@ int get_key(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	float results[3];
+	int results = 0 ;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -168,7 +176,7 @@ int main(void)
   MX_DAC_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-	float voltage = 0.0;	
+	int key = 0;
 
   /* USER CODE END 2 */
 
@@ -177,59 +185,52 @@ int main(void)
   while (1)
   {
 		if(debounce > 0){
-			debounce = (debounce + 1) % 100;
+			debounce = (debounce + 1) % debounce_mod;
 		}
-		
-		get_key();
-		
-		
 		
   /* USER CODE END WHILE */
     MX_USB_HOST_Process();
 
   /* USER CODE BEGIN 3 */
-		int first_digit = ((int)results[displayMode] * 100) % 100;
-        int second_digit = ((int)results[displayMode] * 10) % 10;
-        int third_digit = (int)results[displayMode];
+		
+		/* Display the voltage on the LED screen */
+		int first_digit = results * 100;
+    int second_digit = results * 10;
+    int third_digit = results;
 		display(first_digit, 4);
         display(second_digit, 3);
 		display(third_digit, 2);
-		//Systick Interrupt Flag
-			//if (sysTickFlag == 1){
-				sysTickFlag = 0;
-
-         /** Blue button = high
-             The display mode changes RMS --> Min --> Max
-             Update LD5(Max) , LD4(Min) and LD3 (RMS) accordingly.
-         */
+		
+		key = get_key();
+		
+		if(key > -1 && key < 10){
+			printf("key : %d \n", key);
+			voltage = update_voltage(key, 0);
+			printf("voltage : %d \n", voltage);
+		}
+		else if(key == POUND){
+			results = voltage;
+			voltage = 0 ;
+			printf("voltage entered: %d \n", results);
+		}
+		//complete for star 
+		
+			switch(state){
+				case Input:
+					
+					break;
+				case Output:
+					break;
+				case Wait:
+					break;
+				case Sleep:
+					break;
+				default:
+					break;
 			
-				HAL_GPIO_WritePin(GPIOD, LD5_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_RESET);
-        switch(state){
-					case Input:
-						
-						break;
-					case Output:
-						break;
-					case Wait:
-						break;
-					case Sleep:
-						break;
-					default:
-						break;
-				
-				}
-				
-				
-				
-				
-				
 			}
-			
- // }
+		}
   /* USER CODE END 3 */
-
 }
 
 /**
@@ -789,6 +790,16 @@ void display(int number, int position){
 		
 }
 
+
+
+int update_voltage(int digit, int action){
+	//deleted the last digit
+	if(action == 1){
+		return voltage / 10;
+	}
+	printf("%d \n",  (voltage * 10 + digit) % 1000);
+	return (voltage * 10 + digit) % 1000;
+}
 
 /* USER CODE END 4 */
 
