@@ -52,6 +52,9 @@
 
 /* USER CODE BEGIN Includes */
 #include "keypad.h"
+
+
+/* 7-SEGMENT DISPLAY OUTPUT PINS */
 #define SEG_A GPIO_PIN_7			
 #define SEG_B GPIO_PIN_8			
 #define SEG_C GPIO_PIN_9			
@@ -64,8 +67,16 @@
 #define SEG_OUT2 GPIO_PIN_4		
 #define SEG_OUT3 GPIO_PIN_5		
 #define SEG_OUT4 GPIO_PIN_6	
+<<<<<<< HEAD
 #define PWM_PERIOD 168 // (84MHz / 750kHz) - 1 
+=======
+>>>>>>> 72a65e62399c04ea15390e8bacb63937abc335a9
 
+/* CALCULATE DESIRED PWM_PERIOD USING
+ *      PWM_PERIOD = (84MHz / Desired_Freq) / 1
+ */
+
+#define PWM_PERIOD 168
 
 
 /* USER CODE END Includes */
@@ -84,32 +95,45 @@ TIM_HandleTypeDef htim3;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+<<<<<<< HEAD
 enum State {Wait, Output, Sleep};
 struct __FILE {
     int dummy;
 };
 FILE __stdout;
+=======
+enum State {Input, Output, Wait, Sleep};
+
+>>>>>>> 72a65e62399c04ea15390e8bacb63937abc335a9
 enum State state = Wait;
 
 volatile int debounce = 0;
 int debounce_mod = 600;
-int x[] = {0, 0, 0, 0, 0};
-volatile int sysTickFlag;
-volatile int displayMode = 0;
 
+volatile int sysTickFlag;
+int x[] = {0, 0, 0, 0, 0};
+
+/* FIR Coefficients */
 float coeff[5] = {0.2, 0.2, 0.2, 0.2, 0.2};
 int coeff_len = 5;
+
+/* counter and flag to see track the button press duration */
 int count = 0;
 
 // STAR key counter and flag 
 int key_star_counter = 0 ;
 int star_flag = 0 ;
+<<<<<<< HEAD
 int star_release_debounce = 0 ;
 
 int first_digit, second_digit, third_digit;
 
 float min = 10.0;
 float max = 0.0;
+=======
+
+/* RMS tracker */
+>>>>>>> 72a65e62399c04ea15390e8bacb63937abc335a9
 float rms_counter = 0.0;
 float rms[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 static int voltage = 0; 
@@ -206,7 +230,18 @@ int main(void)
     MX_USB_HOST_Process();
 
   /* USER CODE BEGIN 3 */
+<<<<<<< HEAD
 	
+=======
+		
+		/* Display the voltage on the LED screen */
+		int first_digit = results * 100;
+        int second_digit = results * 10;
+        int third_digit = results;
+		display(first_digit, 4);
+        display(second_digit, 3);
+		display(third_digit, 2);
+>>>>>>> 72a65e62399c04ea15390e8bacb63937abc335a9
 		
 		key = get_key();
 		
@@ -598,14 +633,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : BOOT1_Pin PB12 PB13 PB14 
-                           PB15 */
-  GPIO_InitStruct.Pin = BOOT1_Pin|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
-                          |GPIO_PIN_15;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-	
 
   /*Configure GPIO pins : PE7 PE8 PE10 PE11 
                            PE12 PE13 PE14 PE15 */
@@ -623,15 +650,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
   HAL_GPIO_Init(CLK_IN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PD8 PD9 PD10 PD11 
-                           OTG_FS_OverCurrent_Pin */
-													 
-  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11 
-                          |OTG_FS_OverCurrent_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-	
+
 	
   /*Configure GPIO pins : LD4_Pin LD3_Pin LD5_Pin LD6_Pin 
                            Audio_RST_Pin PD7 */
@@ -655,7 +674,27 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(MEMS_INT2_GPIO_Port, &GPIO_InitStruct);
-
+    
+    
+    /*KEYPAD COL GPIO PINS */
+    /*Configure GPIO pins : BOOT1_Pin PB12 PB13 PB14
+     PB15 */
+    GPIO_InitStruct.Pin = BOOT1_Pin|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14
+    |GPIO_PIN_15;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    
+    /*KEYPAD ROW GPIO PINS */
+    /*Configure GPIO pins : PD8 PD9 PD10 PD11
+     OTG_FS_OverCurrent_Pin */
+    GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11
+    |OTG_FS_OverCurrent_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+    
+    
 }
 
 /* USER CODE BEGIN 4 */

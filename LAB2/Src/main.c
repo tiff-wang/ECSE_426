@@ -41,19 +41,19 @@
 #include "stm32f4xx_hal.h"
 
 /* USER CODE BEGIN Includes */
-#define SEG_A GPIO_PIN_7			//Pin PE7  brown cable
-#define SEG_B GPIO_PIN_8			//Pin PE8  brown cable
-#define SEG_C GPIO_PIN_9			//Pin PE9  yellow cable
-#define SEG_D GPIO_PIN_10		//Pin PE10 yellow cable
-#define SEG_E GPIO_PIN_11		//Pin PE11 gray cable
-#define SEG_F GPIO_PIN_12		//Pin PE12 gray cable
-#define SEG_G GPIO_PIN_13		//Pin PE13 green cable
-#define SEG_DP GPIO_PIN_14		//Pin PE14 green cable
+#define SEG_A GPIO_PIN_7
+#define SEG_B GPIO_PIN_8
+#define SEG_C GPIO_PIN_9
+#define SEG_D GPIO_PIN_10
+#define SEG_E GPIO_PIN_11
+#define SEG_F GPIO_PIN_12
+#define SEG_G GPIO_PIN_13
+#define SEG_DP GPIO_PIN_14
 
-#define SEG_OUT1 GPIO_PIN_2		//Pin PE2 white cable
-#define SEG_OUT2 GPIO_PIN_4		//Pin PE4 red cable
-#define SEG_OUT3 GPIO_PIN_5		//Pin PE5 brown cable
-#define SEG_OUT4 GPIO_PIN_6		//Pin PE6 white cable 
+#define SEG_OUT1 GPIO_PIN_2
+#define SEG_OUT2 GPIO_PIN_4
+#define SEG_OUT3 GPIO_PIN_5
+#define SEG_OUT4 GPIO_PIN_6		
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
