@@ -1,5 +1,10 @@
 lab3\keypad.o: ..\Src\keypad.c
+lab3\keypad.o: ../Inc/main.h
 lab3\keypad.o: ..\Src\keypad.h
+lab3\keypad.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
+lab3\keypad.o: ../Inc/stm32f4xx_hal_conf.h
+lab3\keypad.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h
+lab3\keypad.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h
 lab3\keypad.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
 lab3\keypad.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h
 lab3\keypad.o: ../Drivers/CMSIS/Include/core_cm4.h
@@ -10,11 +15,6 @@ lab3\keypad.o: ../Drivers/CMSIS/Include/core_cmFunc.h
 lab3\keypad.o: ../Drivers/CMSIS/Include/core_cmSimd.h
 lab3\keypad.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
 lab3\keypad.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
-lab3\keypad.o: ../Inc/stm32f4xx_hal_conf.h
-lab3\keypad.o: ../Inc/main.h
-lab3\keypad.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h
-lab3\keypad.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h
-lab3\keypad.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
 lab3\keypad.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
 lab3\keypad.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 lab3\keypad.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h
@@ -39,5 +39,4 @@ lab3\keypad.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 lab3\keypad.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 lab3\keypad.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h
 lab3\keypad.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h
-lab3\keypad.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
-lab3\keypad.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\ctype.h
+lab3\keypad.o: ../Inc/usb_host.h

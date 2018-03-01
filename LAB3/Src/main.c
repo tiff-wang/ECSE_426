@@ -49,6 +49,7 @@
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "usb_host.h"
+#include "keypad.h"
 
 
 /* USER CODE BEGIN Includes */
@@ -65,14 +66,7 @@
 #define SEG_OUT3 GPIO_PIN_5		
 #define SEG_OUT4 GPIO_PIN_6	
 #define PWM_PERIOD 168
-#define STAR 20
-#define POUND 21
-#define A 10 
-#define B 11
-#define C 12
-#define D 13
-#define E 14
-#define F 15
+
 
 
 /* USER CODE END Includes */
@@ -110,12 +104,7 @@ float max = 0.0;
 float rms_counter = 0.0;
 float rms[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-const int matrix[4][4]={
-													{1,4,7,STAR},
-													{2,5,8,0},
-													{3,6,9,POUND},
-													{A,B,C,D}
-												};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -150,7 +139,6 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	float results[3];
-	printf("fuck this shit");
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -182,11 +170,6 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	float voltage = 0.0;	
-	printf("hit\n");
-	int counter = 0;
-	while(1) { 
-		printf("%d\n", counter++);
-	}
 
   /* USER CODE END 2 */
 
@@ -194,8 +177,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+		if(debounce > 0){
+			debounce = (debounce + 1) % 500;
+		}
 		
-
+		
+		
+		get_key();
   /* USER CODE END WHILE */
     MX_USB_HOST_Process();
 
@@ -207,7 +195,7 @@ int main(void)
         display(second_digit, 3);
 		display(third_digit, 2);
 		//Systick Interrupt Flag
-			if (sysTickFlag == 1){
+			//if (sysTickFlag == 1){
 				sysTickFlag = 0;
 
          /** Blue button = high
@@ -218,7 +206,6 @@ int main(void)
 				HAL_GPIO_WritePin(GPIOD, LD5_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_RESET);
-
         switch(state){
 					case Input:
 						
@@ -240,7 +227,7 @@ int main(void)
 				
 			}
 			
-  }
+ // }
   /* USER CODE END 3 */
 
 }

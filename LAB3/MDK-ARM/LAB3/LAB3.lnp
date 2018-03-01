@@ -30,6 +30,7 @@
 "lab3\usbh_conf.o"
 "lab3\main.o"
 "lab3\stm32f4xx_hal_msp.o"
+"lab3\keypad.o"
 "lab3\usbh_pipes.o"
 "lab3\usbh_cdc.o"
 "lab3\usbh_core.o"
