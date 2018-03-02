@@ -93,16 +93,16 @@ volatile int sample_counter = 0;
 int x[] = {0, 0, 0, 0, 0};
 
 /* FIR Coefficients */
-float coeff[50] = {0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2};
-int coeff_len = 50;
+float coeff[5] = {0.2, 0.2, 0.2, 0.2};
+int coeff_len = 5;
 
 /* counter and flag to see track the button press duration */
 int count = 0;
 
-// STAR key counter and flag 
+/* STAR key variables */
 int key_star_counter = 0 ;
-int star_flag = 0 ;
-int star_release_debounce = 0 ;
+int star_flag = 0 ; //flag that star was previously pressed
+int star_release_debounce = 0 ; //avoid release misreadings
 
 int first_digit, second_digit, third_digit;
 
