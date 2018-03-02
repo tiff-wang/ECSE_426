@@ -65,14 +65,14 @@
 #define ADC_RES 8
 
 /* CALCULATE DESIRED PWM_PERIOD USING
- *      PWM_PERIOD = 84MHz / (Desired_Freq - 1)
+ *      PWM_PERIOD = 84MHz / Desired_Freq
  */
 
-#define PWM_PERIOD 184 // 750MHz
-#define TIMER_PERIOD 200
+#define PWM_PERIOD 168 // 500kHz
 
 /* CALCULATE DESIRED PRESCALER USING
  *      PRESCALER = (84MHz / Desired_Freq) + 1
+ *      PRESCALER < 2^16 (65536)
  */
 
 #define TIM2_PRESCALER 84000
