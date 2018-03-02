@@ -130,7 +130,7 @@ int main(void)
 	
 	// Give a initial DAC value
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_10B_R, 800);
+	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_8B_R, 800);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -144,8 +144,8 @@ int main(void)
 			debounce = (debounce + 1) % 500;
 		}
       
-        int first_digit = (int)results[displayMode] * 100) % 100;
-        int second_digit = (int)results[displayMode] * 10) % 10;
+        int first_digit = ((int)results[displayMode] * 100) % 100;
+        int second_digit = ((int)results[displayMode] * 10) % 10;
         int third_digit = (int)results[displayMode];
 		display(first_digit, 4);
         display(second_digit, 3);

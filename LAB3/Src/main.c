@@ -116,8 +116,10 @@ static int voltage = 0;
 float duty_cycle = 1.0;
 float res_filter = 0.0;
 
-float w0 = 0.01500013;
-float w1 = 2.84490909;
+//float w0 = 0.01500013;
+//float w1 = 2.84490909;
+float w1 = 1.26965858;
+float w0 = 0.16727964;
 
 /* USER CODE END PV */
 

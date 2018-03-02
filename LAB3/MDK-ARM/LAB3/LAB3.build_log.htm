@@ -22,16 +22,27 @@ Dialog DLL:      TCM.DLL V1.32.0.0
  
 <h2>Project:</h2>
 C:\Users\Isaac Chan\Documents\426New\ECSE_426\LAB3\MDK-ARM\LAB3.uvprojx
-Project File Date:  02/28/2018
+Project File Date:  03/02/2018
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'LAB3'
 compiling main.c...
+../Src/main.c(683): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  	if(duty_cycle < 0.0) duty_cycle = 0.0;
+../Src/main.c(684): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  	else if(duty_cycle > 1.0) duty_cycle = 1.0;
+../Src/main.c(718): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  	rms_counter = rms_counter + 1.0;
+../Src/main.c(934): warning:  #9-D: nested comment is not allowed
+  	/* USER CODE END 6 */
+../Src/main.c(948): warning:  #1-D: last line of file ends without a newline
+  /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+../Src/main.c: 5 warnings, 0 errors
 linking...
-Program Size: Code=24164 RO-data=516 RW-data=164 ZI-data=3612  
+Program Size: Code=20376 RO-data=512 RW-data=328 ZI-data=2248  
 FromELF: creating hex file...
-"LAB3\LAB3.axf" - 0 Error(s), 0 Warning(s).
+"LAB3\LAB3.axf" - 0 Error(s), 5 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -54,7 +65,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.2
-Build Time Elapsed:  00:00:03
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>
