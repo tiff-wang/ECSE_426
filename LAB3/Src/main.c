@@ -67,17 +67,14 @@
 #define SEG_OUT2 GPIO_PIN_4		
 #define SEG_OUT3 GPIO_PIN_5		
 #define SEG_OUT4 GPIO_PIN_6	
-<<<<<<< HEAD
-#define PWM_PERIOD 168 // (84MHz / 750kHz) - 1 
-=======
->>>>>>> 72a65e62399c04ea15390e8bacb63937abc335a9
-
+#define SYSTICK_FREQ 1000
 /* CALCULATE DESIRED PWM_PERIOD USING
  *      PWM_PERIOD = (84MHz / Desired_Freq) / 1
  */
 
-#define PWM_PERIOD 168
+#define PWM_PERIOD 184 // 750MHz
 
+#define TIMER_PERIOD 200
 
 /* USER CODE END Includes */
 
@@ -95,22 +92,16 @@ TIM_HandleTypeDef htim3;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-<<<<<<< HEAD
-enum State {Wait, Output, Sleep};
-struct __FILE {
-    int dummy;
-};
-FILE __stdout;
-=======
-enum State {Input, Output, Wait, Sleep};
 
->>>>>>> 72a65e62399c04ea15390e8bacb63937abc335a9
+enum State {Wait, Output, Sleep};
+
 enum State state = Wait;
 
 volatile int debounce = 0;
 int debounce_mod = 600;
 
 volatile int sysTickFlag;
+volatile int sample_counter = 0;
 int x[] = {0, 0, 0, 0, 0};
 
 /* FIR Coefficients */
@@ -123,17 +114,11 @@ int count = 0;
 // STAR key counter and flag 
 int key_star_counter = 0 ;
 int star_flag = 0 ;
-<<<<<<< HEAD
 int star_release_debounce = 0 ;
 
 int first_digit, second_digit, third_digit;
 
-float min = 10.0;
-float max = 0.0;
-=======
-
 /* RMS tracker */
->>>>>>> 72a65e62399c04ea15390e8bacb63937abc335a9
 float rms_counter = 0.0;
 float rms[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 static int voltage = 0; 
@@ -191,8 +176,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-	
-	
+
 
   /* USER CODE END SysInit */
 
@@ -203,13 +187,15 @@ int main(void)
   MX_USB_HOST_Init();
   MX_ADC1_Init();
   MX_TIM1_Init();
-  MX_DAC_Init();
+ // MX_DAC_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	int key = 0;
 	
 	HAL_TIM_Base_Start(&htim3);
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+	HAL_TIM_Base_Start(&htim1);
+	HAL_ADC_Start_IT(&hadc1);
 
   /* USER CODE END 2 */
 
@@ -217,6 +203,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
 		if(debounce > 0){
 			debounce = (debounce + 1) % debounce_mod;
 		}
@@ -230,19 +217,8 @@ int main(void)
     MX_USB_HOST_Process();
 
   /* USER CODE BEGIN 3 */
-<<<<<<< HEAD
-	
-=======
-		
-		/* Display the voltage on the LED screen */
-		int first_digit = results * 100;
-        int second_digit = results * 10;
-        int third_digit = results;
-		display(first_digit, 4);
-        display(second_digit, 3);
-		display(third_digit, 2);
->>>>>>> 72a65e62399c04ea15390e8bacb63937abc335a9
-		
+	if(sysTickFlag == 1){
+		sysTickFlag = 0;
 		key = get_key();
 		
 		/* Always check for STAR inputs */ 
@@ -322,6 +298,7 @@ int main(void)
 			
 			}
 		}
+	}
   /* USER CODE END 3 */
 }
 
@@ -372,7 +349,9 @@ void SystemClock_Config(void)
 
     /**Configure the Systick interrupt time 
     */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+	
+	
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/SYSTICK_FREQ);
 
     /**Configure the Systick 
     */
@@ -395,9 +374,9 @@ static void MX_ADC1_Init(void)
   hadc1.Init.Resolution = ADC_RESOLUTION_10B;
   hadc1.Init.ScanConvMode = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
-  hadc1.Init.DiscontinuousConvMode = DISABLE;
-  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.DiscontinuousConvMode = ENABLE;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
+  hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T1_CC1;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc1.Init.NbrOfConversion = 1;
   hadc1.Init.DMAContinuousRequests = DISABLE;
@@ -491,14 +470,14 @@ static void MX_SPI1_Init(void)
 /* TIM1 init function */
 static void MX_TIM1_Init(void)
 {
-
+	
   TIM_ClockConfigTypeDef sClockSourceConfig;
   TIM_MasterConfigTypeDef sMasterConfig;
-
+	__TIM1_CLK_ENABLE();
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 0;
+  htim1.Init.Prescaler = 84000;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 0; 
+  htim1.Init.Period = 10; 
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
@@ -518,7 +497,9 @@ static void MX_TIM1_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
+	
+	HAL_TIM_MspPostInit(&htim1);
+	
 }
 
 /* TIM3 init function */
@@ -558,7 +539,7 @@ static void MX_TIM3_Init(void)
   }
 
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0.7 * PWM_PERIOD;
+  sConfigOC.Pulse = 0.95 * PWM_PERIOD;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)

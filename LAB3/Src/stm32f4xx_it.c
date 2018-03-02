@@ -36,13 +36,15 @@
 #include "stm32f4xx_it.h"
 
 /* USER CODE BEGIN 0 */
-
+uint32_t value;
+extern int sysTickFlag;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
 extern HCD_HandleTypeDef hhcd_USB_OTG_FS;
 extern ADC_HandleTypeDef hadc1;
 extern TIM_HandleTypeDef htim1;
+extern int sample_counter;
 
 /******************************************************************************/
 /*            Cortex-M4 Processor Interruption and Exception Handlers         */ 
@@ -59,6 +61,8 @@ void SysTick_Handler(void)
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
+	
+	sysTickFlag = 1;
 	
   /* USER CODE END SysTick_IRQn 1 */
 }
@@ -94,7 +98,9 @@ void TIM1_BRK_TIM9_IRQHandler(void)
   /* USER CODE END TIM1_BRK_TIM9_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   /* USER CODE BEGIN TIM1_BRK_TIM9_IRQn 1 */
-
+	
+	
+	
   /* USER CODE END TIM1_BRK_TIM9_IRQn 1 */
 }
 
@@ -104,11 +110,11 @@ void TIM1_BRK_TIM9_IRQHandler(void)
 void TIM1_UP_TIM10_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_UP_TIM10_IRQn 0 */
-
+	
   /* USER CODE END TIM1_UP_TIM10_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   /* USER CODE BEGIN TIM1_UP_TIM10_IRQn 1 */
-
+	
   /* USER CODE END TIM1_UP_TIM10_IRQn 1 */
 }
 
