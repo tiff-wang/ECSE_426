@@ -265,21 +265,17 @@ int main(void)
                 break;
             
             case Output:
-                if(count < 20) {
+               /* if (count < 40) {
                     count++;
                 }
                 else{
-                    /* Update the display digits */
-                    first_digit = (adc_voltage / 100 ) % 10 ;
-                    second_digit = (adc_voltage / 10) % 10 ;
-                    third_digit = adc_voltage % 10 ;
-                
-                    printf("%d \n", adc_voltage);
-                    /* Go to state Wait */
-                    state = Wait;
+                    printf("Adc_voltage read : %d \n", adc_voltage);
                     count = 0;
                 }
+                */
+                /* Do nothing and wait until reset to Wait mode */
                 break;
+                
 
             case Sleep:
                 /* Update the digits to -1 (turn off) */
@@ -735,6 +731,10 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	}
 	count = (count + 1) % 500;
 	adc_voltage = sqrt(sum / ((rms_counter < 10) ? rms_counter : 10));
+    /* Update the display digits */
+    first_digit = (adc_voltage / 100 ) % 10 ;
+    second_digit = (adc_voltage / 10) % 10 ;
+    third_digit = adc_voltage % 10 ;
 }
 
 /**
