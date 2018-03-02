@@ -71,7 +71,7 @@
 #define PWM_PERIOD 168 // 500kHz
 
 /* CALCULATE DESIRED PRESCALER USING
- *      PRESCALER = (84MHz / Desired_Freq) + 1
+ *      PRESCALER = (84MHz / (Desired_Freq * Period)) + 1
  *      PRESCALER < 2^16 (65536)
  */
 
