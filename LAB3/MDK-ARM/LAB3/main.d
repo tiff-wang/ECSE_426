@@ -38,5 +38,7 @@ lab3\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 lab3\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 lab3\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h
 lab3\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h
-lab3\main.o: ../Inc/usb_host.h
+lab3\main.o: ../Inc/voltmeter.h
+lab3\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 lab3\main.o: ../Src/keypad.h
+lab3\main.o: ../Inc/usb_host.h
