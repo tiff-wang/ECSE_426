@@ -96,7 +96,15 @@ int x[] = {0, 0, 0, 0, 0};
 float coeff[5] = {0.2, 0.2, 0.2, 0.2};
 int coeff_len = 5;
 
-/* counter and flag to see track the button press duration */
+/* RMS tracker */
+float rms_counter = 0.0;
+float rms[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+static int voltage = 0;
+
+float duty_cycle = 1.0;
+
+
+/* Counter to wait for update before updating the ADC */
 int count = 0;
 
 /* STAR key variables */
@@ -104,16 +112,14 @@ int key_star_counter = 0 ;
 int star_flag = 0 ; //flag that star was previously pressed
 int star_release_debounce = 0 ; //avoid release misreadings
 
+/* display digits */
 int first_digit, second_digit, third_digit;
 
-/* RMS tracker */
-float rms_counter = 0.0;
-float rms[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-static int voltage = 0; 
 
-float duty_cycle = 1.0;
 float res_filter = 0.0;
 
+
+/* Duty Cycle calculation weights (From Linear Regression) */
 //float w0 = 0.01500013;
 //float w1 = 2.84490909;
 float w1 = 1.26965858;
@@ -198,13 +204,17 @@ int main(void)
 			}
 			else{
 				star_flag = 0;
+                
+                /* STAR KEY pressed for 1-2 seconds (medium press)*/
 				if(key_star_counter > 5 && key_star_counter <  15){
-					state = Wait; 
+					state = Wait;
+                    
 					first_digit = 0 ;
 					second_digit = 0 ;
 					third_digit = 0 ;
-					
-					adjust_pwm(0);
+
+                    // set output voltage to 0
+                    adjust_pwm(0);
 					
 					printf("Go to state Wait");
 				} 
@@ -215,76 +225,73 @@ int main(void)
 		if(key == STAR){
 			star_release_debounce = 0;
 			key_star_counter++;
+            
+            /* STAR KEY quickly pressed (short press)*/
 			if (state == Wait){
 				voltage = update_voltage(0, 1);
 			}
 			if(star_flag == 1){
-				//check how long the key has been pressed
+				 /* STAR KEY pressed for over 3 seconds (long press)*/
 				if (key_star_counter >  15){
-				//goes to sleep
 				state = Sleep;
+                    
+                // set output voltage to 0
+                adjust_pwm(0);
+                
 				printf("Go to state Sleep");
 				}
 			}
 			star_flag = 1;
 		}
-		else if(key == STAR && star_flag == 1){
-			star_release_debounce = 0;
-			key_star_counter++;
-			//check how long the key has been pressed
-			if (key_star_counter >  120){
-				//goes to sleep
-				state = Sleep;
-				printf("Go to state Sleep");
-				
-			}
-		}
-			switch(state){
-				case Wait:
-					if(key > -1 && key < 20){
-						voltage = update_voltage(key, 0);
-						printf("voltage : %d \n", voltage);
-					}
-					else if(key == POUND){
-						results = voltage;
-						printf("voltage entered: %d \n", results);
-						adjust_pwm(voltage);
-						HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-						printf("duty-cycle:%f \n", duty_cycle);
-						state = Output;
-						count = 0 ;
-						voltage = 0 ;
-					}
-					break;
-				
-				case Output:
-					if(count < 20) {
-						count++;
-					} 
-					else{
-						/* Update the display digits */
-						first_digit = (adc_voltage / 100 ) % 10 ;
-						second_digit = (adc_voltage / 10) % 10 ;
-						third_digit = adc_voltage % 10 ;
-					
-						printf("%d \n", adc_voltage);
-						/* Go to state Wait */
-						state = Wait;
-						count = 0;
-					}
-					break;
+		
+        switch(state){
+            case Wait:
+                /* update voltage on input */
+                if(key > -1 && key < 20){
+                    voltage = update_voltage(key, 0);
+                    printf("voltage : %d \n", voltage);
+                }
+                /* enter voltage */
+                else if(key == POUND){
+                    results = voltage;
+                    printf("voltage entered: %d \n", results);
+                    adjust_pwm(voltage);
+                    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+                    printf("duty-cycle:%f \n", duty_cycle);
+                    state = Output;
+                    count = 0 ;
+                    voltage = 0 ;
+                }
+                break;
+            
+            case Output:
+                if(count < 20) {
+                    count++;
+                }
+                else{
+                    /* Update the display digits */
+                    first_digit = (adc_voltage / 100 ) % 10 ;
+                    second_digit = (adc_voltage / 10) % 10 ;
+                    third_digit = adc_voltage % 10 ;
+                
+                    printf("%d \n", adc_voltage);
+                    /* Go to state Wait */
+                    state = Wait;
+                    count = 0;
+                }
+                break;
 
-				case Sleep:
-					/* Update the digits to -1 (turn off) */
-					first_digit = -1 ;
-					second_digit = -1 ;
-					third_digit = -1 ;
-					voltage = 0 ;
-					break;
-				
-				default:
-					break;
-			
+            case Sleep:
+                /* Update the digits to -1 (turn off) */
+                first_digit = -1 ;
+                second_digit = -1 ;
+                third_digit = -1 ;
+                voltage = 0 ;
+                break;
+            
+            default:
+                break;
+        
 			}
 		}
 	}
@@ -675,6 +682,12 @@ void FIR_C(int input, float *output) {
   }
 }
 
+/**
+ * @brief  Update PWM pulse duty cycle to get desired voltage
+ * @param  int voltage
+ * @retval None
+ */
+
 void adjust_pwm(int voltage) {
 
 	duty_cycle = (voltage / 100.0 - w0) / w1;
@@ -698,8 +711,9 @@ void adjust_pwm(int voltage) {
 
 
 /**
- * @brief  FIR Filter takes in integer inputs serially and returns the filtered data (output)
- * @param  integer input, output address (pointer to index in output array)
+ * @brief  ADC Converter - function activated at every trigger (by timer2)
+ *          function also does the voltage updates and computations
+ * @param  ADC_HandleTypeDef hadc
  * @retval None
  */
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
@@ -723,6 +737,13 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	adc_voltage = sqrt(sum / ((rms_counter < 10) ? rms_counter : 10));
 }
 
+/**
+ * @brief  This function updates the voltage
+ *          action 1: delete last digit
+ *          action 0: add new digit (max three digits)
+ * @param  int digit, int action
+ * @retval int new voltage
+ */
 
 int update_voltage(int digit, int action){
 	//deleted the last digit
