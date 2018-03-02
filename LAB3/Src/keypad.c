@@ -3,7 +3,7 @@
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx.h"
 
-extern int debounce;
+extern int debounce ;
 
 
 uint16_t row_pins[NUM_ROW] = {KEYPAD_ROW1, KEYPAD_ROW2, KEYPAD_ROW3, KEYPAD_ROW4};
