@@ -39,14 +39,7 @@
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "voltmeter.h"
-
-#define STAR 11
-#define HASH 12
-#define SYSTICK_FREQUENCY 1000
-#define ADC_RES 8
-
-void write_to_display(float val);
-void shut_off_display(void);
+#include "math.h"
 
 /* USER CODE BEGIN Includes */
 #include "keypad.h"
@@ -65,14 +58,18 @@ void shut_off_display(void);
 #define SEG_OUT2 GPIO_PIN_4		
 #define SEG_OUT3 GPIO_PIN_5		
 #define SEG_OUT4 GPIO_PIN_6	
-#define SYSTICK_FREQ 1000
+
+
+
+#define SYSTICK_FREQUENCY 50
+#define ADC_RES 8
 
 /* CALCULATE DESIRED PWM_PERIOD USING
  *      PWM_PERIOD = (84MHz / Desired_Freq) / 1
  */
 
 #define PWM_PERIOD 184 // 750MHz
-#define TIMER_PERIOD W200
+#define TIMER_PERIOD 200
 
 /* USER CODE END Includes */
 
@@ -98,8 +95,8 @@ volatile int sample_counter = 0;
 int x[] = {0, 0, 0, 0, 0};
 
 /* FIR Coefficients */
-float coeff[5] = {0.2, 0.2, 0.2, 0.2, 0.2};
-int coeff_len = 5;
+float coeff[50] = {0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2,0.2, 0.2, 0.2, 0.2, 0.2};
+int coeff_len = 50;
 
 /* counter and flag to see track the button press duration */
 int count = 0;
@@ -116,8 +113,11 @@ float rms_counter = 0.0;
 float rms[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 static int voltage = 0; 
 
-float duty_cycle = 0.5;
+float duty_cycle = 1.0;
 float res_filter = 0.0;
+
+float w0 = 0.01500013;
+float w1 = 2.84490909;
 
 /* USER CODE END PV */
 
@@ -137,12 +137,12 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void display(int number, int position);
 int get_key(void);
 int update_voltage(int digit, int action);
-
+void adjust_pwm(int voltage);
 
 /* USER CODE END PFP */
 
 // for storing adc voltage value
-uint8_t adc_voltage;
+int adc_voltage;
 
 int holding = 0;
 int hold_count = 0;
@@ -191,65 +191,87 @@ int main(void)
 		sysTickFlag = 0;
 		key = get_key();
 		
-		/* Always check for STAR inputs */ 
-		if(key == STAR){
-			star_flag = 1;
-			key_star_counter++;
-			star_release_debounce = 0;
-		}
-		else if(star_flag == 1){
-			//allow for key misreadings
-			if(star_release_debounce < 3) {
-				star_release_debounce++; 
+		/* Always check for STAR inputs */
+		if(key != STAR && star_flag == 1) {
+			if(star_release_debounce < 20){ 
+				star_release_debounce++;
 			}
 			else{
-				star_release_debounce = 0;
 				star_flag = 0;
-				//check how long the key has been pressed
-				if(key_star_counter > 25 && key_star_counter <  75){
-					//restart operation				
+				if(key_star_counter > 5 && key_star_counter <  15){
 					state = Wait; 
+					first_digit = 0 ;
+					second_digit = 0 ;
+					third_digit = 0 ;
+					
+					adjust_pwm(0);
+					
 					printf("Go to state Wait");
 				} 
-				else {
-					//goes to sleep
-					state = Sleep;
-					printf("Go to state Sleep");
+				key_star_counter = 0;
+				star_release_debounce = 0;
+			}
+		}
+		if(key == STAR){
+			star_release_debounce = 0;
+			key_star_counter++;
+			if (state == Wait){
+				voltage = update_voltage(0, 1);
+			}
+			if(star_flag == 1){
+				//check how long the key has been pressed
+				if (key_star_counter >  15){
+				//goes to sleep
+				state = Sleep;
+				printf("Go to state Sleep");
 				}
+			}
+			star_flag = 1;
+		}
+		else if(key == STAR && star_flag == 1){
+			star_release_debounce = 0;
+			key_star_counter++;
+			//check how long the key has been pressed
+			if (key_star_counter >  120){
+				//goes to sleep
+				state = Sleep;
+				printf("Go to state Sleep");
+				
 			}
 		}
 			switch(state){
 				case Wait:
-					if(key > -1 && key < 10){
+					if(key > -1 && key < 20){
 						voltage = update_voltage(key, 0);
 						printf("voltage : %d \n", voltage);
 					}
 					else if(key == POUND){
 						results = voltage;
-						voltage = 0 ;
 						printf("voltage entered: %d \n", results);
-					}
-					else if(key == STAR){
-						star_flag = 1;
-						key_star_counter++;
-						star_release_debounce = 0;
-					}
-					// when key == -1 (nothing is pressed)
-					else if(star_flag == 1){
-							//check how long this is
-								//delete last entered digit 
-						voltage = update_voltage(0, 1);
+						adjust_pwm(voltage);
+						HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+						printf("duty-cycle:%f \n", duty_cycle);
+						state = Output;
+						count = 0 ;
+						voltage = 0 ;
 					}
 					break;
 				
 				case Output:
-					/* Update the display digits */
-					first_digit = (adc_voltage / 100 ) % 10 ;
-					second_digit = (adc_voltage / 10) % 10 ;
-					third_digit = adc_voltage % 10 ;
-				
-					/* Go to state Wait */
-					state = Wait;
+					if(count < 20) {
+						count++;
+					} 
+					else{
+						/* Update the display digits */
+						first_digit = (adc_voltage / 100 ) % 10 ;
+						second_digit = (adc_voltage / 10) % 10 ;
+						third_digit = adc_voltage % 10 ;
+					
+						printf("%d \n", adc_voltage);
+						/* Go to state Wait */
+						state = Wait;
+						count = 0;
+					}
 					break;
 
 				case Sleep:
@@ -653,6 +675,27 @@ void FIR_C(int input, float *output) {
   }
 }
 
+void adjust_pwm(int voltage) {
+
+	duty_cycle = (voltage / 100.0 - w0) / w1;
+	if(duty_cycle < 0.0) duty_cycle = 0.0;
+	else if(duty_cycle > 1.0) duty_cycle = 1.0;
+	
+	TIM_OC_InitTypeDef sConfigOC;
+	sConfigOC.Pulse = duty_cycle * PWM_PERIOD;
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	{
+		_Error_Handler(__FILE__, __LINE__);
+	}\
+
+	HAL_TIM_MspPostInit(&htim3);
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+}
+
+
 
 /**
  * @brief  FIR Filter takes in integer inputs serially and returns the filtered data (output)
@@ -664,9 +707,20 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
   /* Prevent unused argument(s) compilation warning */
 	int adc_value = HAL_ADC_GetValue(&hadc1);
 	FIR_C(adc_value, &res_filter);
-	printf("filtered_val: %f \n\n", res_filter);
-	adc_voltage = 3.0 * res_filter / ((1 << ADC_RES) - 1.0);
-	printf("adc_voltage: %d \n\n", adc_voltage);
+	adc_voltage = 300 * res_filter / ((1 << ADC_RES) - 1);
+	
+	for(int i = 0 ; i < 9 ; i++){
+      rms[i] = rms[i + 1];
+  }
+	rms[9] = adc_voltage * adc_voltage;
+	rms_counter = rms_counter + 1.0;
+	float sum = 0;
+	
+	for(int k = 0 ; k < 10 ; k++){
+		sum += rms[k];
+	}
+	count = (count + 1) % 500;
+	adc_voltage = sqrt(sum / ((rms_counter < 10) ? rms_counter : 10));
 }
 
 
@@ -874,7 +928,7 @@ void assert_failed(uint8_t* file, uint32_t line)
 {
 	/* USER CODE BEGIN 6 */
 	/* User can add his own implementation to report the file name and line number,
-ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+
 	/* USER CODE END 6 */
 
 }
