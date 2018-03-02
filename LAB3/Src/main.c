@@ -65,11 +65,18 @@
 #define ADC_RES 8
 
 /* CALCULATE DESIRED PWM_PERIOD USING
- *      PWM_PERIOD = (84MHz / Desired_Freq) / 1
+ *      PWM_PERIOD = 84MHz / (Desired_Freq - 1)
  */
 
 #define PWM_PERIOD 184 // 750MHz
 #define TIMER_PERIOD 200
+
+/* CALCULATE DESIRED PRESCALER USING
+ *      PRESCALER = (84MHz / Desired_Freq) + 1
+ */
+
+#define TIM2_PRESCALER 84000
+#define TIM2_PERIOD 10
 
 /* USER CODE END Includes */
 
@@ -394,9 +401,9 @@ static void MX_TIM2_Init(void)
 	TIM_MasterConfigTypeDef sMasterConfig;
 
 	htim2.Instance = TIM2;
-	htim2.Init.Prescaler = 84000; // changed from 10 to 84000 so that sampling frequency is 1KHz
+	htim2.Init.Prescaler = TIM2_PRESCALER;
 	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim2.Init.Period = 10; // this activates the ADC in 1 period (ms)
+	htim2.Init.Period = TIM2_PERIOD; // Period count per trigger
 	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
 	{
@@ -685,8 +692,9 @@ void FIR_C(int input, float *output) {
  */
 
 void adjust_pwm(int voltage) {
-
 	duty_cycle = (voltage / 100.0 - w0) / w1;
+    
+    // 0 < duty_cycle < 1
 	if(duty_cycle < 0.0) duty_cycle = 0.0;
 	else if(duty_cycle > 1.0) duty_cycle = 1.0;
 	
@@ -698,7 +706,7 @@ void adjust_pwm(int voltage) {
 	if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
 	{
 		_Error_Handler(__FILE__, __LINE__);
-	}\
+	}
 
 	HAL_TIM_MspPostInit(&htim3);
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
