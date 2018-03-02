@@ -53,6 +53,7 @@ int get_key(){
 				default: 
 					break;
 			}
+            /* Read the rows to */
 			for (int i = 0; i < NUM_ROW; i++){
 				if(KEYPAD_ROW_GPIO->IDR & row_pins[i]){
 					reading = matrix[col][i];

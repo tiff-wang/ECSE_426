@@ -91,8 +91,8 @@ TIM_HandleTypeDef htim3;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-enum State {Input, Output, Wait, Sleep};
 
+enum State {Input, Output, Wait, Sleep};
 enum State state = Wait;
 
 volatile int debounce = 0;

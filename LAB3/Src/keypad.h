@@ -18,5 +18,15 @@
 #define NUM_ROW 4 
 #define NUM_COL 4
 
+/*
+ * remove for now because COL_3 and COL_4 seem to intefere. 
+#define A 10
+#define B 11
+#define C 12
+#define D 13
+#define e 14
+ */
+ 
+
 int get_key(void);
 void init_keypad(void);
