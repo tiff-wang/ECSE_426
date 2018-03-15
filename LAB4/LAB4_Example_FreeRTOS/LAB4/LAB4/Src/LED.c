@@ -187,9 +187,13 @@ void display(int number, int position){
 		HAL_GPIO_WritePin(GPIOE, SEG_DP , GPIO_PIN_RESET);
 	}	
 	
-	
-	int k;
-	for (k = 0; k<=5000; k++)
-	{}
-		
+}
+
+
+void reset_display(){
+	display(-1, 1);
+	display(-1, 2);
+	display(-1, 3);
+	display(-1, 4);
+	HAL_GPIO_WritePin(GPIOE, SEG_DP , GPIO_PIN_RESET);
 }

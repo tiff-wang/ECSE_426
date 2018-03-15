@@ -48,3 +48,5 @@ lab4\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 lab4\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 lab4\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 lab4\main.o: ../Src/keypad.h
+lab4\main.o: ../Src/LED.h
+lab4\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h

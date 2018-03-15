@@ -51,6 +51,8 @@
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
 #include "keypad.h"
+#include "LED.h"
+#include "math.h"
 
 /* 7-SEGMENT DISPLAY OUTPUT PINS - GPIOE */ 
 #define SEG_A GPIO_PIN_7			
@@ -75,6 +77,8 @@ osThreadId defaultTaskHandle;
 osThreadId myTask02Handle;
 osThreadId myTask03Handle;
 osSemaphoreId myBinarySem01Handle;
+
+TIM_HandleTypeDef htim3;
 
 ADC_HandleTypeDef hadc1;
 
@@ -117,6 +121,7 @@ int first_digit, second_digit, third_digit;
 float res_filter = 0.0;
 
 int results = 0;
+int adc_voltage = 0;
 
 
 uint32_t MySig = 0;
@@ -133,11 +138,16 @@ float w0 = 0.16727964;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_TIM3_Init(void);
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 void StartDefaultTask(void const * argument);
 void StartTask02(void const * argument);
 void StartTask03(void const * argument);
-int update_voltage(int digit, int action);
 
+int update_voltage(int digit, int action);
+void FIR_C(int input, float *output); 
+void adjust_pwm(int voltage);
 
 
 int main(void)
@@ -149,8 +159,8 @@ int main(void)
 
   MX_GPIO_Init();
 	MX_ADC1_Init();
-	
-	init_keypad();
+	MX_TIM3_Init();
+
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -191,7 +201,7 @@ int main(void)
 
 }
 
-/* StartDefaultTask function */  
+/* StartDefaultTask function */  // ADC
 void StartDefaultTask(void const * argument)
 {
 
@@ -201,20 +211,37 @@ void StartDefaultTask(void const * argument)
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 		
 			HAL_ADC_Start(&hadc1);
-			float value = 0;
+			int adc_value = 0;
 					//polling data of sensor
 			if (HAL_ADC_PollForConversion(&hadc1, 10000) == HAL_OK){
-					value = HAL_ADC_GetValue(&hadc1);
+					adc_value = HAL_ADC_GetValue(&hadc1);
 			}
 			HAL_ADC_Stop(&hadc1);
 			
-			//printf("%f\n", value);
+			//printf("%d\n", adc_value);
+			
+			FIR_C(adc_value, &res_filter);
+			adc_voltage = 300 * res_filter / ((1 << ADC_RES) - 1);
+
+			for(int i = 0 ; i < 9 ; i++){
+					rms[i] = rms[i + 1];
+			}
+			rms[9] = adc_voltage * adc_voltage;
+			rms_counter = rms_counter + 1.0;
+			float sum = 0;
+
+			for(int k = 0 ; k < 10 ; k++){
+				sum += rms[k];
+			}
+			count = (count + 1) % 500;
+			adc_voltage = sqrt(sum / ((rms_counter < 10) ? rms_counter : 10));
+
   }
 
 }
 
-/* StartTask02 function */
-void StartTask02(void const * argument)
+/* StartTask03 function */ 	//Keypad
+void StartTask03(void const * argument)
 {
   
   for(;;)
@@ -228,22 +255,21 @@ void StartTask02(void const * argument)
 		
 		/* Always check for STAR inputs */
 		if(key != STAR && star_flag == 1) {
-			if(star_release_debounce < 20){ 
+			if(star_release_debounce < 2){ 
 				star_release_debounce++;
 			}
 			else{
 				star_flag = 0;
                 
          /* STAR KEY pressed for 1-2 seconds (medium press)*/
-				if(key_star_counter > 5 && key_star_counter <  13){
+				if(key_star_counter > 3 && key_star_counter <  10){
 					state = Wait;
-                    
-					first_digit = 0 ;
-					second_digit = 0 ;
-					third_digit = 0 ;
-
-                    // set output voltage to 0
-                 //   adjust_pwm(0);
+					
+         // set output voltage to 0
+          adjust_pwm(0);
+					
+					osThreadResume(defaultTaskHandle);
+					osThreadResume(myTask02Handle);
 					
 					printf("Go to state Wait\n");
 				} 
@@ -255,17 +281,16 @@ void StartTask02(void const * argument)
 			star_release_debounce = 0;
 			key_star_counter++;
             
-            /* STAR KEY quickly pressed (short press)*/
+      /* STAR KEY quickly pressed (short press)*/
 			if (state == Wait){
-				printf("update voltage\n");
+				update_voltage(0, 1);
 			}
 			if(star_flag == 1){
 				 /* STAR KEY pressed for over 3 seconds (long press)*/
-				if (key_star_counter >  13){
+				if (key_star_counter >  10){
 				state = Sleep;
-                    
-                // set output voltage to 0
-              //  adjust_pwm(0);
+        //set output voltage to 0
+        adjust_pwm(0);
                 
 				printf("Go to state Sleep\n");
 				}
@@ -284,7 +309,7 @@ void StartTask02(void const * argument)
                 else if(key == POUND){
                     results = voltage;
                     printf("voltage entered: %d \n", results);
-               //     adjust_pwm(voltage);
+                    adjust_pwm(voltage);
                     printf("duty-cycle:%f \n", duty_cycle);
                     state = Output;
                     count = 0 ;
@@ -293,24 +318,17 @@ void StartTask02(void const * argument)
                 break;
             
             case Output:
-               /* if (count < 40) {
-                    count++;
-                }
-                else{
-                    printf("Adc_voltage read : %d \n", adc_voltage);
-                    count = 0;
-                }
-                */
-                /* Do nothing and wait until reset to Wait mode */
+								printf("Adc_voltage read : %d \n", adc_voltage);
+                state = Wait;
                 break;
                 
 
             case Sleep:
                 /* Update the digits to -1 (turn off) */
-                first_digit = -1 ;
-                second_digit = -1 ;
-                third_digit = -1 ;
                 voltage = 0 ;
+								reset_display();
+								osThreadSuspend(defaultTaskHandle);
+								osThreadSuspend(myTask02Handle);
                 break;
             
             default:
@@ -321,16 +339,29 @@ void StartTask02(void const * argument)
   }
  
 
-/* StartTask03 function */
-void StartTask03(void const * argument)
+/* StartTask02 function */  //LED
+void StartTask02(void const * argument)
 {
   
   for(;;)
   {
-		osSignalWait(MySig, 5000);    // Waits until the signal is set by the function in thread-2. Is an example of using Signals to control/protect a part of the code, such as shared spaces.
-		HAL_GPIO_TogglePin(GPIOD, GPIONumber);
-		MySig =0; 									// osSignalClear(myTask03Handle,MySig); is not supported by CubeMx. As I have said before, the FreeRTOS is new and there are some changes. This is my treat, whether true or not looks fine.
-		osDelay(20);
+		static int digit_update = 0 ;
+		if(digit_update == 0){
+			digit_update = (digit_update + 1) % 100;
+			/* Update the display digits */
+			first_digit = (adc_voltage / 100 ) % 10 ;
+			second_digit = (adc_voltage / 10) % 10 ;
+			third_digit = adc_voltage % 10 ;
+		}
+		
+		/* Display the voltage on the LED screen */
+		display(first_digit, 2);
+		osDelay(6);
+		display(second_digit, 3);
+		osDelay(6);
+		display(third_digit, 4);
+		osDelay(6);
+		reset_display();
   }
   
 }
@@ -406,8 +437,6 @@ static void MX_ADC1_Init(void)
 	hadc1.Init.ScanConvMode = DISABLE;
 	hadc1.Init.ContinuousConvMode = DISABLE;
 	hadc1.Init.DiscontinuousConvMode = DISABLE;
-//	hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
-//	hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T2_TRGO;
 	hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
 	hadc1.Init.NbrOfConversion = 1;
 	hadc1.Init.DMAContinuousRequests = DISABLE;
@@ -605,7 +634,25 @@ static void MX_GPIO_Init(void)
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-		
+	
+	//7-segment display
+	GPIO_InitStruct.Pin = SEG_A | SEG_B | SEG_D | SEG_E | SEG_F | SEG_G | SEG_DP | SEG_OUT1 | SEG_OUT2 | SEG_OUT3 | SEG_OUT4 ; 	
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; //push pull mode
+	GPIO_InitStruct.Pull = GPIO_NOPULL; // no pull cause already push pull
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH; 
+	
+	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct); 
+	HAL_GPIO_WritePin(GPIOE, SEG_A | SEG_B | SEG_D | SEG_E | SEG_F | SEG_G | SEG_DP | SEG_OUT1 | SEG_OUT2 | SEG_OUT3 | SEG_OUT4, GPIO_PIN_RESET); 
+
+    
+	GPIO_InitStruct.Pin = SEG_C ;	
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; //push pull mode
+	GPIO_InitStruct.Pull = GPIO_NOPULL; // no pull cause already push pull
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH; 
+	
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct); 
+	HAL_GPIO_WritePin(GPIOB, SEG_C, GPIO_PIN_RESET); 
+
 
 }
 
@@ -627,6 +674,54 @@ int update_voltage(int digit, int action){
 	return (voltage * 10 + digit) % 1000;
 }
 
+/**
+ * @brief  FIR Filter takes in integer inputs serially and returns the filtered data (output)
+ * @param  integer input, output address (pointer to index in output array)
+ * @retval None
+ */
+void FIR_C(int input, float *output) {
+  // Shift all x to the left
+  for(int i = 0 ; i < 4 ; i++){
+      x[i] = x[i + 1];
+  }
+  
+  //update x[4] with new input
+  x[4] = input;
+  
+  
+  //calculate output
+  *output = 0 ;
+  for(int i = 0 ; i < 5 ; i++){
+      *output = *output + x[i] * coeff[i];
+  }
+}
+
+/**
+ * @brief  Update PWM pulse duty cycle to get desired voltage
+ * @param  int voltage
+ * @retval None
+ */
+
+void adjust_pwm(int voltage) {
+	duty_cycle = (voltage / 100.0 - w0) / w1;
+    
+    // 0 < duty_cycle < 1
+	if(duty_cycle < 0.0) duty_cycle = 0.0;
+	else if(duty_cycle > 1.0) duty_cycle = 1.0;
+	
+	TIM_OC_InitTypeDef sConfigOC;
+	sConfigOC.Pulse = duty_cycle * PWM_PERIOD;
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	{
+		_Error_Handler(__FILE__, __LINE__);
+	}
+
+	HAL_TIM_MspPostInit(&htim3);
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
@@ -643,6 +738,41 @@ void _Error_Handler(char * file, int line)
   /* USER CODE END Error_Handler_Debug */ 
 }
 
+/* TIM3 init function */
+static void MX_TIM3_Init(void)
+{
+
+	TIM_MasterConfigTypeDef sMasterConfig;
+	TIM_OC_InitTypeDef sConfigOC;
+
+	htim3.Instance = TIM3;
+	htim3.Init.Prescaler = 0;
+	htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim3.Init.Period = PWM_PERIOD;
+	htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+	{
+		_Error_Handler(__FILE__, __LINE__);
+	}
+
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+	{
+		_Error_Handler(__FILE__, __LINE__);
+	}
+
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+	sConfigOC.Pulse = duty_cycle * PWM_PERIOD;
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	{
+		_Error_Handler(__FILE__, __LINE__);
+	}
+
+	HAL_TIM_MspPostInit(&htim3);
+}
 #ifdef USE_FULL_ASSERT
 
 /**
