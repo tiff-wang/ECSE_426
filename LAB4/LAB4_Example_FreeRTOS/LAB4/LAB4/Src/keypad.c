@@ -29,7 +29,7 @@ int get_key(){
     /* Add a debouncer to avoid multi reading of a single press
      * the debouncer_mod value can be changed in main.c
      */
-	if(debounce == 0){
+	if(1){
 		debounce++;
         
         /* output current at each column and row inputs until detection of active low */

@@ -50,35 +50,99 @@
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
+#include "keypad.h"
+
+/* 7-SEGMENT DISPLAY OUTPUT PINS - GPIOE */ 
+#define SEG_A GPIO_PIN_7			
+#define SEG_B GPIO_PIN_8			
+#define SEG_C GPIO_PIN_1 //GPIOB			
+#define SEG_D GPIO_PIN_10			
+#define SEG_E GPIO_PIN_11		
+#define SEG_F GPIO_PIN_12			
+#define SEG_G GPIO_PIN_13		
+#define SEG_DP GPIO_PIN_14		
+#define SEG_OUT1 GPIO_PIN_2		
+#define SEG_OUT2 GPIO_PIN_4		
+#define SEG_OUT3 GPIO_PIN_5		
+#define SEG_OUT4 GPIO_PIN_6	
+#define PWM_PERIOD 168 // 500kHz
 
 
+#define ADC_RES 8
 
 /* Private variables ---------------------------------------------------------*/
 osThreadId defaultTaskHandle;
 osThreadId myTask02Handle;
 osThreadId myTask03Handle;
 osSemaphoreId myBinarySem01Handle;
-ADC_HandleTypeDef hadc1;
 
+ADC_HandleTypeDef hadc1;
 
 uint16_t GPIONumber;
 
+volatile int debounce = 0;
+
+enum State {Wait, Output, Sleep};
+enum State state = Wait;
+int debounce_mod = 600;
+
+volatile int sample_counter = 0;
+int x[] = {0, 0, 0, 0, 0};
+
+/* FIR Coefficients */
+float coeff[5] = {0.2, 0.2, 0.2, 0.2};
+int coeff_len = 5;
+
+/* RMS tracker */
+float rms_counter = 0.0;
+float rms[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+volatile int voltage = 0;
+
+volatile float duty_cycle = 1.0;
+
+
+/* Counter to wait for update before updating the ADC */
+int count = 0;
+
+/* STAR key variables */
+int key = -1;
+int key_star_counter = 0 ;
+int star_flag = 0 ; //flag that star was previously pressed
+int star_release_debounce = 0 ; //avoid release misreadings
+
+/* display digits */
+int first_digit, second_digit, third_digit;
+
+
+float res_filter = 0.0;
+
+int results = 0;
+
+
+uint32_t MySig = 0;
+
+/* Duty Cycle calculation weights (From Linear Regression) */
+//float w0 = 0.01500013;
+//float w1 = 2.84490909;
+float w1 = 1.26965858;
+float w0 = 0.16727964;
+
+
+
+/* Private Function Protoype ---------------------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 void StartDefaultTask(void const * argument);
 void StartTask02(void const * argument);
 void StartTask03(void const * argument);
+int update_voltage(int digit, int action);
 
-volatile int debounce = 0;
-
-
-uint32_t MySig = 0;
 
 
 int main(void)
 {
-
+	
   HAL_Init();
 
   SystemClock_Config();
@@ -86,6 +150,7 @@ int main(void)
   MX_GPIO_Init();
 	MX_ADC1_Init();
 	
+	init_keypad();
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -96,6 +161,12 @@ int main(void)
   osSemaphoreDef(myBinarySem01);
   myBinarySem01Handle = osSemaphoreCreate(osSemaphore(myBinarySem01), 1);
 
+	
+	/*
+	* Default = ADC 
+	* Task2 = LED 
+	* Task3 = Keypad
+	*/
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
@@ -120,13 +191,13 @@ int main(void)
 
 }
 
-/* StartDefaultTask function */
+/* StartDefaultTask function */  
 void StartDefaultTask(void const * argument)
 {
 
   for(;;)
   {		
-    osDelay(200);
+    osDelay(1); // the argument in miliseconds 
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 		
 			HAL_ADC_Start(&hadc1);
@@ -137,7 +208,7 @@ void StartDefaultTask(void const * argument)
 			}
 			HAL_ADC_Stop(&hadc1);
 			
-			printf("%f\n", value);
+			//printf("%f\n", value);
   }
 
 }
@@ -148,15 +219,107 @@ void StartTask02(void const * argument)
   
   for(;;)
   {
-    osDelay(700);		
+    osDelay(200); //read keypad every 200ms
+		if(debounce > 0){
+			debounce = (debounce + 1) % debounce_mod;
+		}
+		key = get_key();
 		
-		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
-		GPIONumber = GPIO_PIN_14;
-		osSignalSet(myTask03Handle,MySig);				// you can see here, if we do not have this Signal, the Thread-3 toggles PIN_14 or maybe PIN_15, you comment this line and see what happens. The project
-		GPIONumber = GPIO_PIN_15;									// will not work as expected. You can comment the line of PIN_14 or PIN-15 and see what happens. 
+		
+		/* Always check for STAR inputs */
+		if(key != STAR && star_flag == 1) {
+			if(star_release_debounce < 20){ 
+				star_release_debounce++;
+			}
+			else{
+				star_flag = 0;
+                
+         /* STAR KEY pressed for 1-2 seconds (medium press)*/
+				if(key_star_counter > 5 && key_star_counter <  13){
+					state = Wait;
+                    
+					first_digit = 0 ;
+					second_digit = 0 ;
+					third_digit = 0 ;
+
+                    // set output voltage to 0
+                 //   adjust_pwm(0);
+					
+					printf("Go to state Wait\n");
+				} 
+				key_star_counter = 0;
+				star_release_debounce = 0;
+			}
+		}
+		if(key == STAR){
+			star_release_debounce = 0;
+			key_star_counter++;
+            
+            /* STAR KEY quickly pressed (short press)*/
+			if (state == Wait){
+				printf("update voltage\n");
+			}
+			if(star_flag == 1){
+				 /* STAR KEY pressed for over 3 seconds (long press)*/
+				if (key_star_counter >  13){
+				state = Sleep;
+                    
+                // set output voltage to 0
+              //  adjust_pwm(0);
+                
+				printf("Go to state Sleep\n");
+				}
+			}
+			star_flag = 1;
+		}
+		
+        switch(state){
+            case Wait:
+                /* update voltage on input */
+                if(key > -1 && key < 20){
+                    voltage = update_voltage(key, 0);
+                    printf("voltage : %d \n", voltage);
+                }
+                /* enter voltage */
+                else if(key == POUND){
+                    results = voltage;
+                    printf("voltage entered: %d \n", results);
+               //     adjust_pwm(voltage);
+                    printf("duty-cycle:%f \n", duty_cycle);
+                    state = Output;
+                    count = 0 ;
+                    voltage = 0 ;
+                }
+                break;
+            
+            case Output:
+               /* if (count < 40) {
+                    count++;
+                }
+                else{
+                    printf("Adc_voltage read : %d \n", adc_voltage);
+                    count = 0;
+                }
+                */
+                /* Do nothing and wait until reset to Wait mode */
+                break;
+                
+
+            case Sleep:
+                /* Update the digits to -1 (turn off) */
+                first_digit = -1 ;
+                second_digit = -1 ;
+                third_digit = -1 ;
+                voltage = 0 ;
+                break;
+            
+            default:
+                break;
+        
+			}
+		}
   }
-  
-}
+ 
 
 /* StartTask03 function */
 void StartTask03(void const * argument)
@@ -292,9 +455,8 @@ static void MX_ADC1_Init(void)
 */
 static void MX_GPIO_Init(void)
 {
-
-  GPIO_InitTypeDef GPIO_InitStruct;
-
+	GPIO_InitTypeDef GPIO_InitStruct;
+	
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -428,9 +590,42 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(MEMS_INT2_GPIO_Port, &GPIO_InitStruct);
 
+	/*KEYPAD COL GPIO PINS */
+	/*Configure GPIO pins : BOOT1_Pin PB12 PB13 PB14
+	 PB15 */
+	GPIO_InitStruct.Pin = BOOT1_Pin|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	
+	/*KEYPAD ROW GPIO PINS */
+	/*Configure GPIO pins : PD8 PD9 PD10 PD11
+	 OTG_FS_OverCurrent_Pin */
+	GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11 |OTG_FS_OverCurrent_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+		
+
 }
 
 
+/**
+ * @brief  This function updates the voltage
+ *          action 1: delete last digit
+ *          action 0: add new digit (max three digits)
+ * @param  int digit, int action
+ * @retval int new voltage
+ */
+
+int update_voltage(int digit, int action){
+	//deleted the last digit
+	if(action == 1){
+		return voltage / 10;
+	}
+	printf("%d \n",  (voltage * 10 + digit) % 1000);
+	return (voltage * 10 + digit) % 1000;
+}
 
 
 /**
