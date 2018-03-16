@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=C:/Users/ashahs/OneDrive/McGill/TAing/ECSE426/Winter 2018/Solutions/LAB4/LAB4/Inc
+HeaderPath=C:/Users/Isaac Chan/Documents/426NewL4/ECSE_426/LAB4/LAB4_Example_FreeRTOS/LAB4/LAB4/Inc
 HeaderFiles=FreeRTOSConfig.h;stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;
-SourcePath=C:/Users/ashahs/OneDrive/McGill/TAing/ECSE426/Winter 2018/Solutions/LAB4/LAB4/Src
+SourcePath=C:/Users/Isaac Chan/Documents/426NewL4/ECSE_426/LAB4/LAB4_Example_FreeRTOS/LAB4/LAB4/Src
 SourceFiles=FreeRTOSConfig.h;stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;freertos.c;stm32f4xx_it.c;stm32f4xx_hal_msp.c;main.c;
 
 [PreviousLibFiles]
@@ -10,4 +10,7 @@ LibFiles=Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h;Drivers/STM32F4xx_
 [PreviousUsedKeilFiles]
 SourceFiles=../Src/main.c;../Src/freertos.c;../Src/stm32f4xx_it.c;../Src/stm32f4xx_hal_msp.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c;../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c;../Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/port.c;../Middlewares/Third_Party/FreeRTOS/Source/croutine.c;../Middlewares/Third_Party/FreeRTOS/Source/event_groups.c;../Middlewares/Third_Party/FreeRTOS/Source/list.c;../Middlewares/Third_Party/FreeRTOS/Source/queue.c;../Middlewares/Third_Party/FreeRTOS/Source/tasks.c;../Middlewares/Third_Party/FreeRTOS/Source/timers.c;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c;../Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c;../Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/arm/startup_stm32f407xx.s;../Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/port.c;../Middlewares/Third_Party/FreeRTOS/Source/croutine.c;../Middlewares/Third_Party/FreeRTOS/Source/event_groups.c;../Middlewares/Third_Party/FreeRTOS/Source/list.c;../Middlewares/Third_Party/FreeRTOS/Source/queue.c;../Middlewares/Third_Party/FreeRTOS/Source/tasks.c;../Middlewares/Third_Party/FreeRTOS/Source/timers.c;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c;
 HeaderPath=..\Drivers\STM32F4xx_HAL_Driver\Inc;..\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy;..\Middlewares\Third_Party\FreeRTOS\Source\portable\RVDS\ARM_CM4F;..\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\Middlewares\Third_Party\FreeRTOS\Source\include;..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS;..\Drivers\CMSIS\Include;
+
+[]
+SourceFiles=;;
 

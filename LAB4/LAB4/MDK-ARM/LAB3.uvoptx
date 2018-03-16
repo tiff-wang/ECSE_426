@@ -150,9 +150,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>791</LineNumber>
+          <LineNumber>899</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134230158</Address>
+          <Address>134230070</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -161,7 +161,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Src/main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\LAB3\../Src/main.c\791</Expression>
+          <Expression>\\LAB3\../Src/main.c\899</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
