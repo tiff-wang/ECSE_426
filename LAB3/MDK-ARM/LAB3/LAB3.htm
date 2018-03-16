@@ -3,7 +3,7 @@
 <title>Static Call Graph - [LAB3\LAB3.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image LAB3\LAB3.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Fri Mar 02 05:08:56 2018
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Thu Mar 15 18:39:06 2018
 <BR><P>
 <H3>Maximum Stack Usage =        372 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -467,10 +467,10 @@ Global Symbols
 <LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_round
 <LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 </UL>
-<BR>[Called By]<UL><LI><a href="#[68]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dsub
-<LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADC_ConvCpltCallback
-<LI><a href="#[69]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_drsub
+<BR>[Called By]<UL><LI><a href="#[69]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_drsub
 <LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<LI><a href="#[68]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dsub
+<LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADC_ConvCpltCallback
 </UL>
 
 <P><STRONG><a name="[68]"></a>__aeabi_dsub</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, dadd.o(.text))
@@ -490,8 +490,8 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_round
 </UL>
-<BR>[Called By]<UL><LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjust_pwm
-<LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<BR>[Called By]<UL><LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjust_pwm
 </UL>
 
 <P><STRONG><a name="[6b]"></a>__aeabi_i2d</STRONG> (Thumb, 34 bytes, Stack size 16 bytes, dflti.o(.text))
@@ -523,8 +523,8 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[e1]"></a>__aeabi_cdrcmple</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, cdrcmple.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjust_pwm
-<LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<BR><BR>[Called By]<UL><LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjust_pwm
 </UL>
 
 <P><STRONG><a name="[6d]"></a>__aeabi_d2f</STRONG> (Thumb, 56 bytes, Stack size 8 bytes, d2f.o(.text))
@@ -543,20 +543,20 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[63]"></a>__aeabi_llsl</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, llshl.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
-<LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
+<BR><BR>[Called By]<UL><LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 <LI><a href="#[71]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2ulz
 <LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
+<LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 </UL>
 
 <P><STRONG><a name="[f5]"></a>_ll_shift_l</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llshl.o(.text), UNUSED)
 
 <P><STRONG><a name="[62]"></a>__aeabi_llsr</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, llushr.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[6c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2iz
-<LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
+<BR><BR>[Called By]<UL><LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 <LI><a href="#[71]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2ulz
 <LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 <LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_dsqrt
+<LI><a href="#[6c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2iz
 </UL>
 
 <P><STRONG><a name="[f6]"></a>_ll_ushift_r</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llushr.o(.text), UNUSED)
@@ -578,10 +578,10 @@ Global Symbols
 <P><STRONG><a name="[67]"></a>_double_round</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, depilogue.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = _double_round
 </UL>
-<BR>[Called By]<UL><LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ddiv
-<LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
-<LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
+<BR>[Called By]<UL><LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 <LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_dsqrt
+<LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ddiv
+<LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 </UL>
 
 <P><STRONG><a name="[66]"></a>_double_epilogue</STRONG> (Thumb, 156 bytes, Stack size 32 bytes, depilogue.o(.text))
@@ -591,9 +591,9 @@ Global Symbols
 <LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsl
 <LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_round
 </UL>
-<BR>[Called By]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
+<BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
+<LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
 <LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
-<LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
 </UL>
 
 <P><STRONG><a name="[6f]"></a>__aeabi_dmul</STRONG> (Thumb, 228 bytes, Stack size 48 bytes, dmul.o(.text), UNUSED)
@@ -626,10 +626,6 @@ Global Symbols
 
 <P><STRONG><a name="[fa]"></a>__scatterload_rt2</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, init.o(.text), UNUSED)
 
-<P><STRONG><a name="[fb]"></a>__decompress</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
-
-<P><STRONG><a name="[fc]"></a>__decompress1</STRONG> (Thumb, 86 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
-
 <P><STRONG><a name="[1c]"></a>ADC_IRQHandler</STRONG> (Thumb, 10 bytes, Stack size 8 bytes, stm32f4xx_it.o(i.ADC_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = ADC_IRQHandler &rArr; HAL_ADC_IRQHandler &rArr; HAL_ADC_ConvCpltCallback &rArr; __aeabi_dadd &rArr; _double_epilogue &rArr; _double_round
 </UL>
@@ -660,16 +656,16 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_ADC1_Init
 </UL>
 
-<P><STRONG><a name="[75]"></a>HAL_ADC_ConvCpltCallback</STRONG> (Thumb, 282 bytes, Stack size 40 bytes, main.o(i.HAL_ADC_ConvCpltCallback))
+<P><STRONG><a name="[75]"></a>HAL_ADC_ConvCpltCallback</STRONG> (Thumb, 346 bytes, Stack size 40 bytes, main.o(i.HAL_ADC_ConvCpltCallback))
 <BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = HAL_ADC_ConvCpltCallback &rArr; __aeabi_dadd &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADC_GetValue
+<LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_sqrt
 <LI><a href="#[78]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
 <LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 <LI><a href="#[6c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2iz
 <LI><a href="#[6d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2f
 <LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FIR_C
-<LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_sqrt
 </UL>
 <BR>[Called By]<UL><LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADC_IRQHandler
 </UL>
@@ -727,8 +723,8 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
-<BR>[Called By]<UL><LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_Delay
-<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_ResetPort
+<BR>[Called By]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_ResetPort
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_Delay
 </UL>
 
 <P><STRONG><a name="[85]"></a>HAL_GPIO_EXTI_Callback</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_EXTI_Callback))
@@ -948,12 +944,12 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[a3]"></a>HAL_TIM_PWM_ConfigChannel</STRONG> (Thumb, 264 bytes, Stack size 16 bytes, stm32f4xx_hal_tim.o(i.HAL_TIM_PWM_ConfigChannel))
-<BR><BR>[Stack]<UL><LI>Max Depth = 28<LI>Call Chain = HAL_TIM_PWM_ConfigChannel &rArr; TIM_OC2_SetConfig
+<BR><BR>[Stack]<UL><LI>Max Depth = 28<LI>Call Chain = HAL_TIM_PWM_ConfigChannel &rArr; TIM_OC4_SetConfig
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_OC2_SetConfig
-<LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_OC4_SetConfig
+<BR>[Calls]<UL><LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_OC4_SetConfig
 <LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_OC3_SetConfig
 <LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_OC1_SetConfig
+<LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_OC2_SetConfig
 </UL>
 <BR>[Called By]<UL><LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjust_pwm
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_TIM3_Init
@@ -999,11 +995,11 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SYSTICK_Config
 <LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
-<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_Error_Handler
 <LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCC_OscConfig
 <LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCC_GetHCLKFreq
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCC_ClockConfig
 <LI><a href="#[b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SYSTICK_CLKSourceConfig
+<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_Error_Handler
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
@@ -1049,9 +1045,9 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_HandleControl
 </UL>
-<BR>[Called By]<UL><LI><a href="#[d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_SetCfg
+<BR>[Called By]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_GetDescriptor
+<LI><a href="#[d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_SetCfg
 <LI><a href="#[cd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_SetAddress
-<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_GetDescriptor
 </UL>
 
 <P><STRONG><a name="[bf]"></a>USBH_CtlSendData</STRONG> (Thumb, 52 bytes, Stack size 40 bytes, usbh_ioreq.o(i.USBH_CtlSendData))
@@ -1075,8 +1071,8 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
 </UL>
-<BR>[Called By]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_HandleEnum
-<LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_Process
+<BR>[Called By]<UL><LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_Process
+<LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_HandleEnum
 </UL>
 
 <P><STRONG><a name="[c2]"></a>USBH_GetDescriptor</STRONG> (Thumb, 74 bytes, Stack size 24 bytes, usbh_ctlreq.o(i.USBH_GetDescriptor))
@@ -1098,8 +1094,8 @@ Global Symbols
 <P><STRONG><a name="[c3]"></a>USBH_Get_CfgDesc</STRONG> (Thumb, 46 bytes, Stack size 24 bytes, usbh_ctlreq.o(i.USBH_Get_CfgDesc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 292<LI>Call Chain = USBH_Get_CfgDesc &rArr; USBH_GetDescriptor &rArr; USBH_CtlReq &rArr; USBH_HandleControl &rArr; USBH_CtlSendData &rArr; USBH_LL_SubmitURB &rArr; HAL_HCD_HC_SubmitRequest &rArr; USB_HC_StartXfer &rArr; USB_WritePacket
 </UL>
-<BR>[Calls]<UL><LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_ParseCfgDesc
-<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_GetDescriptor
+<BR>[Calls]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_GetDescriptor
+<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_ParseCfgDesc
 </UL>
 <BR>[Called By]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_HandleEnum
 </UL>
@@ -1107,8 +1103,8 @@ Global Symbols
 <P><STRONG><a name="[c5]"></a>USBH_Get_DevDesc</STRONG> (Thumb, 46 bytes, Stack size 24 bytes, usbh_ctlreq.o(i.USBH_Get_DevDesc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 292<LI>Call Chain = USBH_Get_DevDesc &rArr; USBH_GetDescriptor &rArr; USBH_CtlReq &rArr; USBH_HandleControl &rArr; USBH_CtlSendData &rArr; USBH_LL_SubmitURB &rArr; HAL_HCD_HC_SubmitRequest &rArr; USB_HC_StartXfer &rArr; USB_WritePacket
 </UL>
-<BR>[Calls]<UL><LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_ParseDevDesc
-<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_GetDescriptor
+<BR>[Calls]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_GetDescriptor
+<LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_ParseDevDesc
 </UL>
 <BR>[Called By]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_HandleEnum
 </UL>
@@ -1116,8 +1112,8 @@ Global Symbols
 <P><STRONG><a name="[c7]"></a>USBH_Get_StringDesc</STRONG> (Thumb, 54 bytes, Stack size 32 bytes, usbh_ctlreq.o(i.USBH_Get_StringDesc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 300<LI>Call Chain = USBH_Get_StringDesc &rArr; USBH_GetDescriptor &rArr; USBH_CtlReq &rArr; USBH_HandleControl &rArr; USBH_CtlSendData &rArr; USBH_LL_SubmitURB &rArr; HAL_HCD_HC_SubmitRequest &rArr; USB_HC_StartXfer &rArr; USB_WritePacket
 </UL>
-<BR>[Calls]<UL><LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_ParseStringDesc
-<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_GetDescriptor
+<BR>[Calls]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_GetDescriptor
+<LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_ParseStringDesc
 </UL>
 <BR>[Called By]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_HandleEnum
 </UL>
@@ -1177,8 +1173,8 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_LL_OpenPipe
 </UL>
-<BR>[Called By]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_HandleEnum
-<LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_Process
+<BR>[Called By]<UL><LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_Process
+<LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_HandleEnum
 </UL>
 
 <P><STRONG><a name="[b5]"></a>USBH_Process</STRONG> (Thumb, 428 bytes, Stack size 32 bytes, usbh_core.o(i.USBH_Process))
@@ -1294,7 +1290,7 @@ Global Symbols
 <BR><BR>[Calls]<UL><LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
 </UL>
 
-<P><STRONG><a name="[fd]"></a>__1printf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0printf), UNUSED)
+<P><STRONG><a name="[fb]"></a>__1printf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0printf), UNUSED)
 
 <P><STRONG><a name="[eb]"></a>__2printf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0printf))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = __2printf
@@ -1303,9 +1299,9 @@ Global Symbols
 <LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[fe]"></a>__c89printf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0printf), UNUSED)
+<P><STRONG><a name="[fc]"></a>__c89printf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0printf), UNUSED)
 
-<P><STRONG><a name="[ff]"></a>printf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0printf), UNUSED)
+<P><STRONG><a name="[fd]"></a>printf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0printf), UNUSED)
 
 <P><STRONG><a name="[79]"></a>__hardfp_sqrt</STRONG> (Thumb, 122 bytes, Stack size 32 bytes, sqrt.o(i.__hardfp_sqrt))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = __hardfp_sqrt &rArr; _dsqrt &rArr; _double_round
@@ -1316,11 +1312,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADC_ConvCpltCallback
 </UL>
 
-<P><STRONG><a name="[100]"></a>__scatterload_copy</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_copy), UNUSED)
+<P><STRONG><a name="[fe]"></a>__scatterload_copy</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_copy), UNUSED)
 
-<P><STRONG><a name="[101]"></a>__scatterload_null</STRONG> (Thumb, 2 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_null), UNUSED)
+<P><STRONG><a name="[ff]"></a>__scatterload_null</STRONG> (Thumb, 2 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_null), UNUSED)
 
-<P><STRONG><a name="[102]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
+<P><STRONG><a name="[100]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
 
 <P><STRONG><a name="[df]"></a>__set_errno</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, errno.o(i.__set_errno))
 <BR><BR>[Called By]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_sqrt
@@ -1365,11 +1361,13 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[5b]"></a>main</STRONG> (Thumb, 626 bytes, Stack size 8 bytes, main.o(i.main))
+<P><STRONG><a name="[5b]"></a>main</STRONG> (Thumb, 644 bytes, Stack size 8 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 372<LI>Call Chain = main &rArr; MX_USB_HOST_Process &rArr; USBH_Process &rArr; USBH_HandleEnum &rArr; USBH_Get_StringDesc &rArr; USBH_GetDescriptor &rArr; USBH_CtlReq &rArr; USBH_HandleControl &rArr; USBH_CtlSendData &rArr; USBH_LL_SubmitURB &rArr; HAL_HCD_HC_SubmitRequest &rArr; USB_HC_StartXfer &rArr; USB_WritePacket
 </UL>
 <BR>[Calls]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Init
 <LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADC_Start_IT
+<LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USB_HOST_Process
+<LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 <LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 <LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Start
 <LI><a href="#[e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Start
@@ -1383,8 +1381,6 @@ Global Symbols
 <LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_TIM2_Init
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_GPIO_Init
 <LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_ADC1_Init
-<LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USB_HOST_Process
-<LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
@@ -1468,9 +1464,9 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = MX_GPIO_Init &rArr; HAL_NVIC_SetPriority &rArr; NVIC_SetPriority
 </UL>
 <BR>[Calls]<UL><LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
-<LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_Init
 <LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_EnableIRQ
+<LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
@@ -1486,7 +1482,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[b3]"></a>MX_TIM3_Init</STRONG> (Thumb, 134 bytes, Stack size 40 bytes, main.o(i.MX_TIM3_Init))
+<P><STRONG><a name="[b3]"></a>MX_TIM3_Init</STRONG> (Thumb, 114 bytes, Stack size 40 bytes, main.o(i.MX_TIM3_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = MX_TIM3_Init &rArr; HAL_TIM_MspPostInit &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIMEx_MasterConfigSynchronization
@@ -1534,9 +1530,9 @@ Local Symbols
 <P><STRONG><a name="[c4]"></a>USBH_ParseCfgDesc</STRONG> (Thumb, 218 bytes, Stack size 40 bytes, usbh_ctlreq.o(i.USBH_ParseCfgDesc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = USBH_ParseCfgDesc &rArr; USBH_GetNextDesc
 </UL>
-<BR>[Calls]<UL><LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_ParseInterfaceDesc
+<BR>[Calls]<UL><LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_GetNextDesc
+<LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_ParseInterfaceDesc
 <LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_ParseEPDesc
-<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_GetNextDesc
 </UL>
 <BR>[Called By]<UL><LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_Get_CfgDesc
 </UL>
@@ -1562,12 +1558,12 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[e0]"></a>_fp_digits</STRONG> (Thumb, 366 bytes, Stack size 64 bytes, printfa.o(i._fp_digits), UNUSED)
-<BR><BR>[Calls]<UL><LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ddiv
-<LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
-<LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
-<LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
+<BR><BR>[Calls]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
 <LI><a href="#[71]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2ulz
 <LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
+<LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ddiv
+<LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
+<LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
 </UL>
 <BR>[Called By]<UL><LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
 </UL>

@@ -38,7 +38,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_hal.h"
-#include "voltmeter.h"
 #include "math.h"
 
 /* USER CODE BEGIN Includes */
@@ -68,8 +67,7 @@
  *      PWM_PERIOD = 84MHz / Desired_Freq
  */
 
-#define PWM_PERIOD 168 // 500kHz
-
+#define PWM_PERIOD 184 // 750kHz
 /* CALCULATE DESIRED PRESCALER USING
  *      PRESCALER = (84MHz / (Desired_Freq * Period)) + 1
  *      PRESCALER < 2^16 (65536)
@@ -89,7 +87,7 @@ TIM_HandleTypeDef htim3;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-enum State {Wait, Output, Sleep};`
+enum State {Wait, Output, Sleep};
 enum State state = Wait;
 
 volatile int debounce = 0;
@@ -128,7 +126,9 @@ float res_filter = 0.0;
 
 /* Duty Cycle calculation weights (From Linear Regression) */
 //float w0 = 0.01500013;
-//float w1 = 2.84490909;
+//float w1 = 1.44162632;
+//float w0 = 0.70142471;
+//float w1 = 1.16595578;
 float w1 = 1.26965858;
 float w0 = 0.16727964;
 
@@ -162,7 +162,7 @@ int hold_count = 0;
 
 
 int main(void)
-{
+ {
 	int results = 0;
 	HAL_Init();
 	SystemClock_Config();
@@ -175,6 +175,7 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOD, LD6_Pin, GPIO_PIN_SET);
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 
+
 	// Start TIM2 Timer
 	HAL_TIM_Base_Start(&htim2);
 	// Start ADC
@@ -184,12 +185,25 @@ int main(void)
 	/* Infinite loop */
 	int key = -1;
 	state = Wait;
+	
+	int display_counter = 0;
 	 while (1)
   {
 
 		if(debounce > 0){
 			debounce = (debounce + 1) % debounce_mod;
 		}
+		
+		if(display_counter == 0){
+												    /* Update the display digits */
+									first_digit = (adc_voltage / 100 ) % 10 ;
+									second_digit = (adc_voltage / 10) % 10 ;
+									third_digit = adc_voltage % 10 ;
+			display_counter++;
+		}else{
+			display_counter = (display_counter + 1) % 5000;
+		}
+			
 		
 		/* Display the voltage on the LED screen */
 		display(first_digit, 2);
@@ -243,7 +257,7 @@ int main(void)
 				state = Sleep;
                     
                 // set output voltage to 0
-                adjust_pwm(0);
+               adjust_pwm(0);
                 
 				printf("Go to state Sleep");
 				}
@@ -272,14 +286,17 @@ int main(void)
                 break;
             
             case Output:
-               /* if (count < 40) {
-                    count++;
-                }
-                else{
-                    printf("Adc_voltage read : %d \n", adc_voltage);
+
+                if (count < 30) {
+									    /* Update the display digits */
+									first_digit = (adc_voltage / 100 ) % 10 ;
+									second_digit = (adc_voltage / 10) % 10 ;
+									third_digit = adc_voltage % 10 ;
+
                     count = 0;
+									state = Wait;
                 }
-                */
+
                 /* Do nothing and wait until reset to Wait mode */
                 break;
                 
@@ -450,7 +467,7 @@ static void MX_TIM3_Init(void)
 	}
 
 	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = duty_cycle * PWM_PERIOD;
+	sConfigOC.Pulse = 0.5;
 	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
 	if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
@@ -641,7 +658,6 @@ static void MX_GPIO_Init(void)
 	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct); 
 	HAL_GPIO_WritePin(GPIOE, SEG_A | SEG_B | SEG_D | SEG_E | SEG_F | SEG_G | SEG_DP | SEG_OUT1 | SEG_OUT2 | SEG_OUT3 | SEG_OUT4, GPIO_PIN_RESET); 
 
-    
 	GPIO_InitStruct.Pin = SEG_C ;	
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; //push pull mode
 	GPIO_InitStruct.Pull = GPIO_NOPULL; // no pull cause already push pull
@@ -739,6 +755,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	}
 	count = (count + 1) % 500;
 	adc_voltage = sqrt(sum / ((rms_counter < 10) ? rms_counter : 10));
+
     /* Update the display digits */
     first_digit = (adc_voltage / 100 ) % 10 ;
     second_digit = (adc_voltage / 10) % 10 ;
