@@ -940,7 +940,7 @@ void StartTask04(void const * argument)
 	for(;;){
 			osDelay(20);
 			if(abs(adc_voltage - results) > MAX(voltage / 20, 10)){
-				duty_cycle = duty_cycle + (results - adc_voltage) * 0.0001;
+				duty_cycle = duty_cycle + (results - adc_voltage) * 0.00007;
 
 				if(duty_cycle < 0.0) duty_cycle = 0.0;
 				else if(duty_cycle > 1.0) duty_cycle = 1.0;

@@ -19,4 +19,5 @@
 
 void init_keypad(void);
 void display(int number, int position);
-void reset_display();
+void reset_display(void);
+
