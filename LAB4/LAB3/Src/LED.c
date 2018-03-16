@@ -189,6 +189,11 @@ void display(int number, int position){
 	
 }
 
+/**
+ * @brief  Turn off the LED screens 
+ * @param  None
+ * @retval None
+ */
 
 void reset_display(){
 	display(-1, 1);

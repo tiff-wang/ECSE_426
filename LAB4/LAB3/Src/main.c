@@ -702,11 +702,10 @@ void FIR_C(int input, float *output) {
 }
 
 /**
- * @brief  Update PWM pulse duty cycle to get desired voltage
+ * @brief  Calculates new duty_cycle from desired_voltage
  * @param  int voltage
  * @retval None
  */
-
 void adjust_pwm(int voltage) {
 	duty_cycle = (voltage / 100.0 - w0) / w1;
   // 0 < duty_cycle < 1
@@ -716,6 +715,11 @@ void adjust_pwm(int voltage) {
 	update_duty_cycle(duty_cycle);
 }
 
+/**
+ * @brief  Update PWM pulse duty cycle to get desired voltage
+ * @param  int voltage
+ * @retval None
+ */
 void update_duty_cycle(float duty){
 	TIM_OC_InitTypeDef sConfigOC;
 	sConfigOC.Pulse = duty * PWM_PERIOD;
@@ -735,7 +739,12 @@ void update_duty_cycle(float duty){
 
 /* USER CODE END 4 */
 
-/* StartDefaultTask function */ //ADC
+/* StartDefaultTask function */ 
+/*
+	ADC THREAD
+	Thread is suspended when KEYPAD is in state Sleep
+  Read ADC every 20ms and passes through the FIR filter and calculates the RMS
+*/
 void StartDefaultTask(void const * argument)
 {
   /* init code for USB_HOST */
@@ -778,7 +787,12 @@ void StartDefaultTask(void const * argument)
 }
 
 /* USER CODE BEGIN 6 */
-/* StartTask03 function */ 	//Keypad
+/* StartTask03 function */ 	
+/*
+	KEYPAD THREAD
+	Thread is always alive 
+  Has 3 different states: Wait, Output and Sleep
+*/
 void StartTask03(void const * argument)
 {
   
@@ -806,6 +820,7 @@ void StartTask03(void const * argument)
          // set output voltage to 0
           adjust_pwm(0);
 					
+					// resume the ADC, update PWM, LED threads
 					osThreadResume(defaultTaskHandle);
 					osThreadResume(myTask02Handle);
 					osThreadResume(myTask04Handle);
@@ -879,7 +894,12 @@ void StartTask03(void const * argument)
 		}
   }
 
-/* StartTask02 function */  //LED
+/* StartTask02 function */  
+/*
+	LED THREAD
+	Thread is suspended when KEYPAD is in state Sleep
+  Updates the digits every 20ms
+*/
 void StartTask02(void const * argument)
 {
   
@@ -909,7 +929,12 @@ void StartTask02(void const * argument)
 
 
 
-/* StartTask04 function */ 	//Update PWM
+/* StartTask04 function */ 	
+/*
+	PWM THREAD
+	Thread is suspended when KEYPAD is in state Sleep
+  Update duty-cycle to maintain adc_voltage within 5% threshold from desired voltage
+*/
 void StartTask04(void const * argument)
 {
 	for(;;){
