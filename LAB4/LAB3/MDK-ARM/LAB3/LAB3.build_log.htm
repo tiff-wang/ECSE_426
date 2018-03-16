@@ -38,15 +38,15 @@ compiling main.c...
   	else if(duty_cycle > 1.0) duty_cycle = 1.0;
 ../Src/main.c(767): warning:  #1035-D: single-precision operand implicitly converted to double-precision
   		rms_counter = rms_counter + 1.0;
-../Src/main.c(915): warning:  #223-D: function "abs" declared implicitly
+../Src/main.c(917): warning:  #223-D: function "abs" declared implicitly
   			if(abs(adc_voltage - results) > MAX(voltage / 20, 10)){
-../Src/main.c(918): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+../Src/main.c(920): warning:  #1035-D: single-precision operand implicitly converted to double-precision
   				if(duty_cycle < 0.0) duty_cycle = 0.0;
-../Src/main.c(919): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+../Src/main.c(921): warning:  #1035-D: single-precision operand implicitly converted to double-precision
   				else if(duty_cycle > 1.0) duty_cycle = 1.0;
 ../Src/main.c: 8 warnings, 0 errors
 linking...
-Program Size: Code=29716 RO-data=684 RW-data=292 ZI-data=19220  
+Program Size: Code=29728 RO-data=684 RW-data=296 ZI-data=19224  
 FromELF: creating hex file...
 "LAB3\LAB3.axf" - 0 Error(s), 8 Warning(s).
 

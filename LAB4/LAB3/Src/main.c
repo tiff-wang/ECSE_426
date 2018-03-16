@@ -251,7 +251,7 @@ int main(void)
 	
 	/* definition and creation of myTask04 */
   osThreadDef(myTask04, StartTask04, osPriorityNormal, 0, 128);
-  myTask02Handle = osThreadCreate(osThread(myTask04), NULL);
+  myTask04Handle = osThreadCreate(osThread(myTask04), NULL);
 
   /* definition and creation of myTask03 */
   osThreadDef(myTask03, StartTask03, osPriorityHigh, 0, 256);
@@ -808,6 +808,7 @@ void StartTask03(void const * argument)
 					
 					osThreadResume(defaultTaskHandle);
 					osThreadResume(myTask02Handle);
+					osThreadResume(myTask04Handle);
 					
 					printf("Go to state Wait\n");
 				} 
@@ -863,11 +864,12 @@ void StartTask03(void const * argument)
                 
 
             case Sleep:
-                /* Update the digits to -1 (turn off) */
                 voltage = 0 ;
+								/* Turn off screen */
 								reset_display();
 								osThreadSuspend(defaultTaskHandle);
 								osThreadSuspend(myTask02Handle);
+								osThreadSuspend(myTask04Handle);
                 break;
             
             default:
