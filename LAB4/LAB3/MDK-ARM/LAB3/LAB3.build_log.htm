@@ -32,17 +32,23 @@ compiling main.c...
   void reset_display();
 ../Src/LED.h(22): warning:  #1295-D: Deprecated declaration reset_display - give arg types
   void reset_display();
-../Src/main.c(702): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+../Src/main.c(713): warning:  #1035-D: single-precision operand implicitly converted to double-precision
   	if(duty_cycle < 0.0) duty_cycle = 0.0;
-../Src/main.c(703): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+../Src/main.c(714): warning:  #1035-D: single-precision operand implicitly converted to double-precision
   	else if(duty_cycle > 1.0) duty_cycle = 1.0;
-../Src/main.c(751): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+../Src/main.c(767): warning:  #1035-D: single-precision operand implicitly converted to double-precision
   		rms_counter = rms_counter + 1.0;
-../Src/main.c: 5 warnings, 0 errors
+../Src/main.c(915): warning:  #223-D: function "abs" declared implicitly
+  			if(abs(adc_voltage - results) > MAX(voltage / 20, 10)){
+../Src/main.c(918): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  				if(duty_cycle < 0.0) duty_cycle = 0.0;
+../Src/main.c(919): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  				else if(duty_cycle > 1.0) duty_cycle = 1.0;
+../Src/main.c: 8 warnings, 0 errors
 linking...
-Program Size: Code=29632 RO-data=652 RW-data=312 ZI-data=19224  
+Program Size: Code=29716 RO-data=684 RW-data=292 ZI-data=19220  
 FromELF: creating hex file...
-"LAB3\LAB3.axf" - 0 Error(s), 5 Warning(s).
+"LAB3\LAB3.axf" - 0 Error(s), 8 Warning(s).
 
 <h2>Software Packages used:</h2>
 

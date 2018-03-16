@@ -76,6 +76,8 @@
 
 #define ADC_RES 8
 
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 /* CALCULATE DESIRED PWM_PERIOD USING
  *      PWM_PERIOD = 84MHz / Desired_Freq
  */
@@ -104,6 +106,7 @@ osThreadId defaultTaskHandle;
 
 osThreadId myTask02Handle;
 osThreadId myTask03Handle;
+osThreadId myTask04Handle;
 
 volatile int debounce = 0;
 enum State {Wait, Output, Sleep};
@@ -114,8 +117,9 @@ volatile int sample_counter = 0;
 int x[] = {0, 0, 0, 0, 0};
 
 /* FIR Coefficients */
-float coeff[10] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
-int coeff_len = 10;
+int coeff_len = 5;
+float coeff[5] = {0.2, 0.2, 0.2, 0.2, 0.2};
+
 
 /* RMS tracker */
 float rms_counter = 0.0;
@@ -147,8 +151,8 @@ int adc_voltage = 0;
 uint32_t MySig = 0;
 
 /* Duty Cycle calculation weights (From Linear Regression) */
-float w1 = 1.26965858;
-float w0 = 0.16727964;
+float w1 = 1.57991255;
+float w0 = 0.9042846;
 
 
 /* USER CODE END PV */
@@ -171,10 +175,12 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void StartDefaultTask(void const * argument);
 void StartTask02(void const * argument);
 void StartTask03(void const * argument);
+void StartTask04(void const * argument);
 
 int update_voltage(int digit, int action);
 void FIR_C(int input, float *output); 
 void adjust_pwm(int voltage);   
+void update_duty_cycle(float duty);
 
 /* USER CODE END PFP */
 
@@ -242,6 +248,10 @@ int main(void)
   /* definition and creation of myTask02 */
   osThreadDef(myTask02, StartTask02, osPriorityNormal, 0, 128);
   myTask02Handle = osThreadCreate(osThread(myTask02), NULL);
+	
+	/* definition and creation of myTask04 */
+  osThreadDef(myTask04, StartTask04, osPriorityNormal, 0, 128);
+  myTask02Handle = osThreadCreate(osThread(myTask04), NULL);
 
   /* definition and creation of myTask03 */
   osThreadDef(myTask03, StartTask03, osPriorityHigh, 0, 256);
@@ -339,7 +349,7 @@ static void MX_ADC1_Init(void)
     */
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
-  hadc1.Init.Resolution = ADC_RESOLUTION_10B;
+  hadc1.Init.Resolution = ADC_RESOLUTION_8B;
   hadc1.Init.ScanConvMode = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
@@ -444,9 +454,9 @@ static void MX_TIM3_Init(void)
   TIM_OC_InitTypeDef sConfigOC;
 
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 4;
+  htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 10;
+  htim3.Init.Period = PWM_PERIOD;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
   {
@@ -472,7 +482,7 @@ static void MX_TIM3_Init(void)
   }
 
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 1;
+  sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
@@ -481,6 +491,8 @@ static void MX_TIM3_Init(void)
   }
 
   HAL_TIM_MspPostInit(&htim3);
+	
+	
 
 }
 
@@ -697,13 +709,16 @@ void FIR_C(int input, float *output) {
 
 void adjust_pwm(int voltage) {
 	duty_cycle = (voltage / 100.0 - w0) / w1;
-    
-    // 0 < duty_cycle < 1
+  // 0 < duty_cycle < 1
 	if(duty_cycle < 0.0) duty_cycle = 0.0;
 	else if(duty_cycle > 1.0) duty_cycle = 1.0;
 	
+	update_duty_cycle(duty_cycle);
+}
+
+void update_duty_cycle(float duty){
 	TIM_OC_InitTypeDef sConfigOC;
-	sConfigOC.Pulse = duty_cycle * PWM_PERIOD;
+	sConfigOC.Pulse = duty * PWM_PERIOD;
 	sConfigOC.OCMode = TIM_OCMODE_PWM1;
 	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -714,6 +729,7 @@ void adjust_pwm(int voltage) {
 
 	HAL_TIM_MspPostInit(&htim3);
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+
 }
 
 
@@ -729,7 +745,7 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(2);
+    osDelay(20);
 		
 		HAL_ADC_Start(&hadc1);
 		int adc_value = 0;
@@ -756,6 +772,7 @@ void StartDefaultTask(void const * argument)
 		}
 		count = (count + 1) % 500;
 		adc_voltage = sqrt(sum / ((rms_counter < 10) ? rms_counter : 10));
+		
   }
   /* USER CODE END 5 */ 
 }
@@ -804,7 +821,7 @@ void StartTask03(void const * argument)
             
       /* STAR KEY quickly pressed (short press)*/
 			if (state == Wait){
-				update_voltage(0, 1);
+				voltage = update_voltage(0, 1);
 			}
 			if(star_flag == 1){
 				 /* STAR KEY pressed for over 3 seconds (long press)*/
@@ -829,17 +846,18 @@ void StartTask03(void const * argument)
                 /* enter voltage */
                 else if(key == POUND){
                     results = voltage;
-                    printf("voltage entered: %d \n", results);
-                    adjust_pwm(voltage);
-                    printf("duty-cycle:%f \n", duty_cycle);
                     state = Output;
-                    count = 0 ;
-                    voltage = 0 ;
                 }
                 break;
             
             case Output:
-								printf("Adc_voltage read : %d \n", adc_voltage);
+								printf("voltage entered: %d \n", results);
+								adjust_pwm(voltage);
+								printf("duty-cycle:%f \n", duty_cycle);
+						
+								count = 0 ;
+                voltage = 0 ;
+						
                 state = Wait;
                 break;
                 
@@ -873,7 +891,7 @@ void StartTask02(void const * argument)
 			third_digit = adc_voltage % 10 ;
 		}
 		
-		digit_update = (digit_update + 1) % 10;
+		digit_update = (digit_update + 1) % 30;
 		
 		/* Display the voltage on the LED screen */
 		display(first_digit, 2);
@@ -887,6 +905,23 @@ void StartTask02(void const * argument)
   
 }
 
+
+
+/* StartTask04 function */ 	//Update PWM
+void StartTask04(void const * argument)
+{
+	for(;;){
+			osDelay(20);
+			if(abs(adc_voltage - results) > MAX(voltage / 20, 10)){
+				duty_cycle = duty_cycle + (results - adc_voltage) * 0.0001;
+
+				if(duty_cycle < 0.0) duty_cycle = 0.0;
+				else if(duty_cycle > 1.0) duty_cycle = 1.0;
+
+				update_duty_cycle(duty_cycle);
+		}
+	}
+}
 
 /* USER CODE END 6*/
 
